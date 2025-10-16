@@ -79,13 +79,13 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     # Send email with password if needed
-    send_user_email(
-        to_email=new_user.email,
-        name=new_user.name or "",
-        email=new_user.email,
-        password=user_data.password,
-        action="created"
-    )
+    # send_user_email(
+    #     to_email=new_user.email,
+    #     name=new_user.name or "",
+    #     email=new_user.email,
+    #     password=user_data.password,
+    #     action="created"
+    # )
     
     return {
         "message": "User created successfully.",
@@ -113,15 +113,15 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     db.commit()
     db.refresh(user)
 
-    if updated_fields:
-        send_user_email(
-            to_email=user.email,
-            name=user.name,
-            email=user.email,
-            password=user_data.password if "Password" in updated_fields else None,
-            action="updated",
-            updated_fields=updated_fields
-        )
+    # if updated_fields:
+    #     send_user_email(
+    #         to_email=user.email,
+    #         name=user.name,
+    #         email=user.email,
+    #         password=user_data.password if "Password" in updated_fields else None,
+    #         action="updated",
+    #         updated_fields=updated_fields
+    #     )
     
     return {
         "message": "User updated successfully.",
