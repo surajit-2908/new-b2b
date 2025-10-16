@@ -26,13 +26,13 @@ def get_all_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    q: str = Query(None, description="Search by name or email")
+    keyword: str = Query(None, description="Search by name or email")
 ):
     query = db.query(User)
-    if q:
+    if keyword:
         query = query.filter(or_(
-            User.name.ilike(f"%{q}%"),
-            User.email.ilike(f"%{q}%")
+            User.name.ilike(f"%{keyword}%"),
+            User.email.ilike(f"%{keyword}%")
         ))
 
     total = query.count()
@@ -40,15 +40,18 @@ def get_all_users(
     users_out: List[UserOut] = [UserOut.from_orm(u) for u in users]
 
     return {
-        "data": users_out,
-        "meta": {
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "pages": (total + limit - 1) // limit,
-            "query": q,
+        "data": {
+            "users": users_out,
+            "meta": {
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "pages": (total + limit - 1) // limit,
+                "query": keyword,
+            }
         }
     }
+
 
 @router.get("/{user_id}", response_model=UserOut)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
