@@ -12,6 +12,7 @@ class UserUpdate(UserBase):
     password: Optional[str] = None 
 
 class UserOut(BaseModel):
+    id: int
     email: EmailStr
     name: Optional[str] = None
 
