@@ -34,6 +34,7 @@ def get_all_users(
             User.name.ilike(f"%{keyword}%"),
             User.email.ilike(f"%{keyword}%")
         ))
+    query = query.order_by(User.created_at.desc())
 
     total = query.count()
     users = query.offset((page - 1) * limit).limit(limit).all()
