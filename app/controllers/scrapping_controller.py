@@ -97,10 +97,16 @@ def get_leads(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    sector: str = Query(..., description="Filter by business sector"),
-    city: str = Query(..., description="Filter by city"),
+    sector: str | None = Query(None, description="Filter by business sector"),
+    city: str | None = Query(None, description="Filter by city"),
 ):
-    query = db.query(Lead).filter(Lead.sector == sector, Lead.city == city)
+    query = db.query(Lead)
+
+    # Apply filters dynamically
+    if sector:
+        query = query.filter(Lead.sector == sector)
+    if city:
+        query = query.filter(Lead.city == city)
 
     total = query.count()
     leads = (
@@ -122,6 +128,6 @@ def get_leads(
                 "pages": (total + limit - 1) // limit,
                 "sector": sector,
                 "city": city,
-            }
+            },
         }
     }
