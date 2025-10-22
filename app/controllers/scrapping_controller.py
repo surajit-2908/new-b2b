@@ -4,8 +4,10 @@ from typing import List
 import httpx, os, asyncio
 from app.database import get_db
 from app.crud.lead import delete_leads_by_sector_city, create_lead
+from app.models.lead import Lead
 from app.schemas.lead import LeadOut
-from app.models.leads import Lead
+from app.models.city import City
+from app.schemas.city import CityOut
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -131,3 +133,21 @@ def get_leads(
             },
         }
     }
+    
+@router.get("/cities", response_model=dict)
+def list_cities(
+    db: Session = Depends(get_db),
+    keyword: str | None = Query(None, description="Search by city name")
+):
+    """
+    Fetch list of cities. Supports optional keyword search.
+    No pagination.
+    """
+    query = db.query(City)
+    if keyword:
+        query = query.filter(City.title.ilike(f"%{keyword}%"))
+
+    cities = query.order_by(City.title.asc()).all()
+    cities_out: List[CityOut] = [CityOut.from_orm(c) for c in cities]
+
+    return {"data": {"cities": cities_out, "count": len(cities_out)}}

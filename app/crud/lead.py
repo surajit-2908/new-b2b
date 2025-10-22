@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.leads import Lead
+from app.models.lead import Lead
 from typing import List
 
 def get_leads_by_sector_city(db: Session, sector: str, city: str) -> List[Lead]:
