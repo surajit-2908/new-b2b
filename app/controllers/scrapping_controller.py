@@ -145,7 +145,7 @@ def list_cities(
     """
     query = db.query(City)
     if keyword:
-        query = query.filter(City.title.ilike(f"%{keyword}%"))
+        query = query.filter(City.title.ilike(f"{keyword}%"))
 
     cities = query.order_by(City.title.asc()).all()
     cities_out: List[CityOut] = [CityOut.from_orm(c) for c in cities]
