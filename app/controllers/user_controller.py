@@ -21,13 +21,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # CRUD OPERATIONS
 # ----------------------------------------------------------------------
 
-@router.get("/", response_model=dict)
+@router.get("/", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def get_all_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    keyword: str = Query(None, description="Search by name or email"),
-    dependencies=[Depends(role_required(["Admin"]))]
+    keyword: str = Query(None, description="Search by name or email")
 ):
     query = db.query(User)
     if keyword:
@@ -55,22 +54,20 @@ def get_all_users(
     }
 
 
-@router.get("/{user_id}", response_model=UserOut)
+@router.get("/{user_id}", response_model=UserOut, dependencies=[Depends(role_required(["Admin"]))])
 def get_user_by_id(
     user_id: int,
-    db: Session = Depends(get_db),
-    dependencies=[Depends(role_required(["Admin"]))]
+    db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.post("/create", response_model=UserResponse)
+@router.post("/create", response_model=UserResponse, dependencies=[Depends(role_required(["Admin"]))])
 def create_user(
     user_data: UserCreate,
-    db: Session = Depends(get_db),
-    dependencies=[Depends(role_required(["Admin"]))]
+    db: Session = Depends(get_db)
 ):
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
@@ -104,12 +101,11 @@ def create_user(
     }
 
 
-@router.put("/update/{user_id}", response_model=UserResponse)
+@router.put("/update/{user_id}", response_model=UserResponse, dependencies=[Depends(role_required(["Admin"]))])
 def update_user(
     user_id: int,
     user_data: UserUpdate,
-    db: Session = Depends(get_db),
-    dependencies=[Depends(role_required(["Admin"]))]
+    db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -147,11 +143,10 @@ def update_user(
         "user": UserOut.from_orm(user)
     }
 
-@router.delete("/delete/{user_id}")
+@router.delete("/delete/{user_id}", dependencies=[Depends(role_required(["Admin"]))])
 def delete_user(
     user_id: int,
-    db: Session = Depends(get_db),
-    dependencies=[Depends(role_required(["Admin"]))]
+    db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -165,11 +160,10 @@ def delete_user(
 # PROFILE MANAGEMENT
 # ----------------------------------------------------------------------
 
-@router.get("/me", response_model=UserOut)
+@router.get("/me", response_model=UserOut, dependencies=[Depends(role_required(["Admin", "User"]))])
 def get_my_profile(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    dependencies=[Depends(role_required(["Admin"]))]
+    current_user: User = Depends(get_current_user)
 ):
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:

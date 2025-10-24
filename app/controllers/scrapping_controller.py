@@ -22,12 +22,11 @@ DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 # -------------------------------------------------------------------
 # 1️⃣ SCRAPE AND SAVE LEADS
 # -------------------------------------------------------------------
-@router.post("/scrape")
+@router.post("/scrape", dependencies=[Depends(role_required(["Admin"]))])
 async def scrape_leads(
     sector: str = Query(..., description="Business sector, e.g. cafe, salon, gym"),
     city: str = Query(..., description="City name, e.g. Kolkata, Pune"),
-    db: Session = Depends(get_db),
-    dependencies=[Depends(role_required(["Admin"]))]
+    db: Session = Depends(get_db)
 ):
 
     if not GOOGLE_PLACES_API_KEY:
@@ -110,14 +109,13 @@ async def scrape_leads(
 # -------------------------------------------------------------------
 # 2️⃣ FETCH LEADS (with pagination & filtering)
 # -------------------------------------------------------------------
-@router.get("/", response_model=dict)
+@router.get("/", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def get_leads(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     sector: str | None = Query(None, description="Filter by business sector"),
-    city: str | None = Query(None, description="Filter by city"),
-    dependencies=[Depends(role_required(["Admin"]))]
+    city: str | None = Query(None, description="Filter by city")
 ):
     query = db.query(Lead)
 
@@ -151,7 +149,7 @@ def get_leads(
         }
     }
     
-@router.get("/cities", response_model=dict)
+@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def list_cities(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by city name")
