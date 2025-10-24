@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 class LeadOut(BaseModel):
+    id: int
     sector: str
     city: str
     phone: Optional[str] = None

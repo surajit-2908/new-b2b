@@ -9,7 +9,7 @@ from app.schemas.user import UserOut, UserCreate, UserUpdate, UserResponse
 from app.utils.email import send_user_email
 from passlib.context import CryptContext
 import os
-import shutil
+from app.role_checker import role_required
 
 router = APIRouter(prefix="/user", tags=["User"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,7 +26,8 @@ def get_all_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    keyword: str = Query(None, description="Search by name or email")
+    keyword: str = Query(None, description="Search by name or email"),
+    dependencies=[Depends(role_required(["Admin"]))]
 ):
     query = db.query(User)
     if keyword:
@@ -55,14 +56,22 @@ def get_all_users(
 
 
 @router.get("/{user_id}", response_model=UserOut)
-def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+def get_user_by_id(
+    user_id: int,
+    db: Session = Depends(get_db),
+    dependencies=[Depends(role_required(["Admin"]))]
+):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 @router.post("/create", response_model=UserResponse)
-def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+    dependencies=[Depends(role_required(["Admin"]))]
+):
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
@@ -96,7 +105,12 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.put("/update/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
+def update_user(
+    user_id: int,
+    user_data: UserUpdate,
+    db: Session = Depends(get_db),
+    dependencies=[Depends(role_required(["Admin"]))]
+):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -134,7 +148,11 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     }
 
 @router.delete("/delete/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    dependencies=[Depends(role_required(["Admin"]))]
+):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -150,7 +168,8 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def get_my_profile(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    dependencies=[Depends(role_required(["Admin"]))]
 ):
     user = db.query(User).filter(User.id == current_user.id).first()
     if not user:
