@@ -22,5 +22,5 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     return {
         "accessToken": token,
         "message": "Logged in successfully",
-        "user": {"id": user.id, "email": user.email, "name": user.name}
+        "user": {"id": user.id, "email": user.email, "name": user.name, "role": user.role}
     }
