@@ -45,10 +45,9 @@ def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)
 @router.get("/leads/{user_id}", response_model=dict)
 def get_user_assigned_leads(user_id: int, db: Session = Depends(get_db)):
     assignments = db.query(UserCitySector).filter(UserCitySector.user_id == user_id).all()
-    if not assignments:
-        raise HTTPException(status_code=404, detail="No sector-city assignments found for this user.")
 
     leads_data = []
+
     for assignment in assignments:
         leads = db.query(Lead).filter(
             Lead.sector == assignment.sector,
@@ -64,5 +63,7 @@ def get_user_assigned_leads(user_id: int, db: Session = Depends(get_db)):
             "leads": serialized_leads
         })
 
+    # ✅ Always return a consistent structure
     return {"data": leads_data}
+
 
