@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import app's Base and models
 from app.database import SQLALCHEMY_DATABASE_URL, Base  # Make sure Base = declarative_base()
-from app.models.users import User  # Import all models included in migrations
+from app.models.user import User  # Import all models included in migrations
 # e.g., from app.models import app, product, etc.
 
 # Alembic Config object

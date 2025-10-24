@@ -3,7 +3,7 @@
 # from app.utils.ocr_utils import extract_text_from_eml_with_ocr
 # from app.auth import get_current_user
 # from app.database import get_db
-# from app.models.users import User
+# from app.models.user import User
 # from app.models.products import ProductSKU
 # from app.models.location import Country, State
 # from app.schemas.order import OrderTextRequest

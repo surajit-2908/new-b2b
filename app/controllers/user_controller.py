@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.database import get_db
-from app.models.users import User
+from app.models.user import User
 from app.auth import get_current_user
 from app.schemas.user import UserOut, UserCreate, UserUpdate, UserResponse
 from app.utils.email import send_user_email
@@ -73,6 +73,7 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         email=user_data.email,
         name=user_data.name,
+        role=user_data.role,
         password=hashed_password
     )
     db.add(new_user)
@@ -107,6 +108,9 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
     if user.email != user_data.email:
         user.email = user_data.email
         updated_fields.append("Email")
+    if user.role != user_data.role:
+        user.role = user_data.role
+        updated_fields.append("role")
     if user_data.password:
         user.password = pwd_context.hash(user_data.password)
         updated_fields.append("Password")

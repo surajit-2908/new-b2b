@@ -7,14 +7,17 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str  
+    role: Optional[str] = "User"
 
 class UserUpdate(UserBase):
     password: Optional[str] = None 
+    role: Optional[str] = "User"
 
 class UserOut(BaseModel):
     id: int
     email: EmailStr
     name: Optional[str] = None
+    role: Optional[str] = None
 
     class Config:
         from_attributes = True
