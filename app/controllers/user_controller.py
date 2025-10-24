@@ -9,7 +9,7 @@ from app.schemas.user import UserOut, UserCreate, UserUpdate, UserResponse
 from app.utils.email import send_user_email
 from passlib.context import CryptContext
 import os
-from app.role_checker import role_required
+from app.auth import role_required
 
 router = APIRouter(prefix="/user", tags=["User"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

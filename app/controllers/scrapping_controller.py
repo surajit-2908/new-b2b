@@ -9,7 +9,7 @@ from app.schemas.lead import LeadOut
 from app.models.city import City
 from app.schemas.city import CityOut
 from dotenv import load_dotenv
-from app.role_checker import role_required
+from app.auth import role_required
 
 load_dotenv()
 router = APIRouter(prefix="/leads", tags=["Leads"])

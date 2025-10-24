@@ -7,7 +7,7 @@ from app.models.lead import Lead
 from app.schemas.lead import LeadOut
 from app.models.user import User
 from app.schemas.user_city_sector_schema import UserCitySectorCreate, UserCitySectorOut
-from app.role_checker import role_required
+from app.auth import role_required
 
 router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 
@@ -49,7 +49,7 @@ def get_user_assigned_leads(
     is_followup: Optional[bool] = Query(False, description="If true, return only follow-up leads"),
     page: int = Query(1, ge=1, description="Page number for pagination"),
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
-    dependencies=[Depends(role_required(["User"]))]
+    dependencies=[Depends(role_required(["Admin", "User"]))]
 ):
     query = db.query(Lead)
 
