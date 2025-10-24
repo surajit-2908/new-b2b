@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, func, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models.user import User
-from app.models.city import City
 
 class UserCitySector(Base):
     __tablename__ = "user_city_sector"
