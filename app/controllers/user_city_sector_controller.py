@@ -98,7 +98,7 @@ def get_user_assigned_leads(
     }
     
 ALLOWED_STATUSES = ["Positive lead", "Not interested"]
-@router.put("/lead/{lead_id}/status", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.put("/lead/{lead_id}/status", response_model=dict, dependencies=[Depends(role_required(["Admin", "User"]))])
 def update_lead_status(
     lead_id: int,
     status: str,
