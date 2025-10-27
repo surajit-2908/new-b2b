@@ -28,7 +28,6 @@ async def scrape_leads(
     city: str = Query(..., description="City name, e.g. Kolkata, Pune"),
     db: Session = Depends(get_db)
 ):
-
     if not GOOGLE_PLACES_API_KEY:
         raise HTTPException(status_code=500, detail="Google Places API key not configured")
 
@@ -42,9 +41,11 @@ async def scrape_leads(
                 "query": f"{sector} in {city}",
                 "key": GOOGLE_PLACES_API_KEY
             }
+
             if next_page_token:
                 params["pagetoken"] = next_page_token
-                await asyncio.sleep(2)
+                # Google requires a small delay (2–3s) before next_page_token becomes active
+                await asyncio.sleep(2.5)
 
             resp = await client.get(TEXT_SEARCH_URL, params=params)
             data = resp.json()
@@ -59,36 +60,32 @@ async def scrape_leads(
                 rating = place.get("rating")
                 user_ratings = place.get("user_ratings_total")
 
-                # Fetch details (phone, website)
+                # ✅ Skip if no place_id (extremely rare)
+                if not place_id:
+                    skipped_count += 1
+                    continue
+
+                # ✅ Check if lead already exists using place_id
+                existing_lead = db.query(Lead).filter(Lead.place_id == place_id).first()
+                if existing_lead:
+                    skipped_count += 1
+                    continue
+
+                # Fetch details for phone and website
                 details_params = {
                     "place_id": place_id,
                     "fields": "formatted_phone_number,website",
                     "key": GOOGLE_PLACES_API_KEY
                 }
+
                 details_res = await client.get(DETAILS_URL, params=details_params)
                 details = details_res.json().get("result", {})
 
-                phone = details.get("formatted_phone_number")
-
-                # ✅ Skip if phone is missing or already exists
-                if not phone:
-                    skipped_count += 1
-                    continue
-
-                existing_lead = db.query(Lead).filter(
-                    Lead.phone == phone,
-                    Lead.city == city,
-                    Lead.sector == sector
-                ).first()
-
-                if existing_lead:
-                    skipped_count += 1
-                    continue
-
                 lead_data = {
+                    "place_id": place_id,
                     "sector": sector,
                     "city": city,
-                    "phone": phone,
+                    "phone": details.get("formatted_phone_number"),
                     "email": None,
                     "address": address,
                     "summary": f"{name} | Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
@@ -97,12 +94,13 @@ async def scrape_leads(
                 create_lead(db, lead_data)
                 created_count += 1
 
+            # Pagination — fetch next page if exists
             next_page_token = data.get("next_page_token")
             if not next_page_token:
                 break
 
     return {
-        "message": f"Scraping completed successfully. {created_count} new leads added, {skipped_count} skipped (existing or invalid)."
+        "message": f"Scraping completed successfully. {created_count} new leads added, {skipped_count} skipped (duplicate or invalid)."
     }
 
 
