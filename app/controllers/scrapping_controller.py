@@ -1,9 +1,11 @@
+import asyncio
+import httpx
 from fastapi import APIRouter, Query, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
 import httpx, os, asyncio
 from app.database import get_db
-from app.crud.lead import delete_leads_by_sector_city, create_lead
+from app.crud.lead import create_lead
 from app.models.lead import Lead
 from app.schemas.lead import LeadOut
 from app.models.city import City
@@ -15,94 +17,126 @@ load_dotenv()
 router = APIRouter(prefix="/leads", tags=["Leads"])
 
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
-TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 
+# Radius (in meters) per grid search
+SEARCH_RADIUS = 50000  # 50 km per grid
+GRID_STEP = 0.1       # degrees ~11 km (tweak for more/fewer queries)
+
+async def get_city_coordinates(city: str) -> tuple[float, float]:
+    """Fetch city center coordinates using Google Geocoding API."""
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        params = {"address": city, "key": GOOGLE_PLACES_API_KEY}
+        res = await client.get(GEOCODE_URL, params=params)
+        data = res.json()
+        if not data.get("results"):
+            raise HTTPException(status_code=404, detail=f"City not found: {city}")
+        loc = data["results"][0]["geometry"]["location"]
+        return loc["lat"], loc["lng"]
 
 # -------------------------------------------------------------------
 # 1️⃣ SCRAPE AND SAVE LEADS
 # -------------------------------------------------------------------
 @router.post("/scrape", dependencies=[Depends(role_required(["Admin"]))])
-async def scrape_leads(
+async def scrape_city_leads(
     sector: str = Query(..., description="Business sector, e.g. cafe, salon, gym"),
     city: str = Query(..., description="City name, e.g. Kolkata, Pune"),
     db: Session = Depends(get_db)
 ):
-    if not GOOGLE_PLACES_API_KEY:
-        raise HTTPException(status_code=500, detail="Google Places API key not configured")
-
-    next_page_token = None
-    created_count = 0
-    skipped_count = 0
+    """Scrape leads citywide by generating a coordinate grid around the city."""
+    city_lat, city_lng = await get_city_coordinates(city)
+    created_count, skipped_count = 0, 0
 
     async with httpx.AsyncClient(timeout=20.0) as client:
-        while True:
-            params = {
-                "query": f"{sector} in {city}",
-                "key": GOOGLE_PLACES_API_KEY
-            }
+        tasks = []
 
-            if next_page_token:
-                params["pagetoken"] = next_page_token
-                # Google requires a small delay (2–3s) before next_page_token becomes active
-                await asyncio.sleep(2.5)
+        # Build grid (±GRID_STEP degrees around city center)
+        for i in range(-3, 4):  # 7x7 grid => 49 search points
+            for j in range(-3, 4):
+                lat = city_lat + (i * GRID_STEP)
+                lng = city_lng + (j * GRID_STEP)
+                tasks.append(fetch_grid_data(client, db, lat, lng, sector, city))
 
-            resp = await client.get(TEXT_SEARCH_URL, params=params)
-            data = resp.json()
-
-            if "error_message" in data:
-                raise HTTPException(status_code=400, detail=data["error_message"])
-
-            for place in data.get("results", []):
-                place_id = place.get("place_id")
-                name = place.get("name")
-                address = place.get("formatted_address")
-                rating = place.get("rating")
-                user_ratings = place.get("user_ratings_total")
-
-                # ✅ Skip if no place_id (extremely rare)
-                if not place_id:
-                    skipped_count += 1
-                    continue
-
-                # ✅ Check if lead already exists using place_id
-                existing_lead = db.query(Lead).filter(Lead.place_id == place_id).first()
-                if existing_lead:
-                    skipped_count += 1
-                    continue
-
-                # Fetch details for phone and website
-                details_params = {
-                    "place_id": place_id,
-                    "fields": "formatted_phone_number,website",
-                    "key": GOOGLE_PLACES_API_KEY
-                }
-
-                details_res = await client.get(DETAILS_URL, params=details_params)
-                details = details_res.json().get("result", {})
-
-                lead_data = {
-                    "place_id": place_id,
-                    "sector": sector,
-                    "city": city,
-                    "phone": details.get("formatted_phone_number"),
-                    "email": None,
-                    "address": address,
-                    "summary": f"{name} | Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
-                }
-
-                create_lead(db, lead_data)
-                created_count += 1
-
-            # Pagination — fetch next page if exists
-            next_page_token = data.get("next_page_token")
-            if not next_page_token:
-                break
+        results = await asyncio.gather(*tasks)
+        for created, skipped in results:
+            created_count += created
+            skipped_count += skipped
 
     return {
-        "message": f"Scraping completed successfully. {created_count} new leads added, {skipped_count} skipped (duplicate or invalid)."
+        "message": f"Scraping completed successfully for {city}. "
+                   f"{created_count} new leads added, {skipped_count} skipped (duplicates)."
     }
 
+
+async def fetch_grid_data(client, db, lat, lng, sector, city):
+    """Fetch nearby results from one grid point (with pagination)."""
+    created, skipped = 0, 0
+    next_page_token = None
+
+    while True:
+        params = {
+            "location": f"{lat},{lng}",
+            "radius": SEARCH_RADIUS,
+            "keyword": sector,
+            "key": GOOGLE_PLACES_API_KEY
+        }
+        if next_page_token:
+            params["pagetoken"] = next_page_token
+            await asyncio.sleep(2.5)  # required delay before using next_page_token
+
+        res = await client.get(NEARBY_URL, params=params)
+        data = res.json()
+
+        if "error_message" in data:
+            print(f"Error: {data['error_message']}")
+            break
+
+        for place in data.get("results", []):
+            place_id = place.get("place_id")
+            name = place.get("name")
+            address = place.get("vicinity")
+            rating = place.get("rating")
+            user_ratings = place.get("user_ratings_total")
+
+            if not place_id:
+                skipped += 1
+                continue
+
+            # Check duplicates by place_id
+            existing = db.query(Lead).filter(Lead.place_id == place_id).first()
+            if existing:
+                skipped += 1
+                continue
+
+            # Get details (phone, website)
+            details_params = {
+                "place_id": place_id,
+                "fields": "formatted_phone_number,website",
+                "key": GOOGLE_PLACES_API_KEY
+            }
+            details_res = await client.get(DETAILS_URL, params=details_params)
+            details = details_res.json().get("result", {})
+
+            lead_data = {
+                "place_id": place_id,
+                "sector": sector,
+                "city": city,
+                "phone": details.get("formatted_phone_number"),
+                "email": None,
+                "address": address,
+                "summary": f"{name} | Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
+            }
+
+            create_lead(db, lead_data)
+            created += 1
+
+        next_page_token = data.get("next_page_token")
+        if not next_page_token:
+            break
+
+    return created, skipped
 
 # -------------------------------------------------------------------
 # 2️⃣ FETCH LEADS (with pagination & filtering)
