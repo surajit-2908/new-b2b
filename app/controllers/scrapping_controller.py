@@ -22,7 +22,7 @@ NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 
 # Radius (in meters) per grid search
-SEARCH_RADIUS = 50000  # 50 km per grid
+SEARCH_RADIUS = 5000  # 5 km per grid
 GRID_STEP = 0.1       # degrees ~11 km (tweak for more/fewer queries)
 
 async def get_city_coordinates(city: str) -> tuple[float, float]:
