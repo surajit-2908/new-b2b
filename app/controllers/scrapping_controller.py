@@ -204,7 +204,7 @@ def list_sectors(
 ):
     query = db.query(Sector)
     if keyword:
-        query = query.filter(Sector.name.ilike(f"{keyword}%"))
+        query = query.filter(Sector.name.ilike(f"%{keyword}%"))
 
     sectors = query.order_by(Sector.name.asc()).all()
     sectors_out: List[SectorOut] = [SectorOut.from_orm(c) for c in sectors]
