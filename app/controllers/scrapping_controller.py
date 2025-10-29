@@ -10,6 +10,8 @@ from app.models.lead import Lead
 from app.schemas.lead import LeadOut
 from app.models.city import City
 from app.schemas.city import CityOut
+from app.models.sector import Sector
+from app.schemas.sector import SectorOut
 from dotenv import load_dotenv
 from app.auth import role_required
 
@@ -181,7 +183,7 @@ def get_leads(
         }
     }
     
-@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin", "User"]))])
 def list_cities(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by city name")
@@ -194,3 +196,17 @@ def list_cities(
     cities_out: List[CityOut] = [CityOut.from_orm(c) for c in cities]
 
     return {"data": {"cities": cities_out, "count": len(cities_out)}}
+    
+@router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "User"]))])
+def list_sectors(
+    db: Session = Depends(get_db),
+    keyword: str | None = Query(None, description="Search by sector name")
+):
+    query = db.query(Sector)
+    if keyword:
+        query = query.filter(Sector.name.ilike(f"{keyword}%"))
+
+    sectors = query.order_by(Sector.name.asc()).all()
+    sectors_out: List[SectorOut] = [SectorOut.from_orm(c) for c in sectors]
+
+    return {"data": {"sectors": sectors_out, "count": len(sectors_out)}}

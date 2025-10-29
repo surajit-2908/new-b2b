@@ -41,7 +41,9 @@ def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(new_assignment)
 
-    return new_assignment
+    return {
+        "message": "Sector and City assigned successfully"
+    }
 
 @router.get("/leads", response_model=dict, dependencies=[Depends(role_required(["Admin", "User"]))])
 def get_user_assigned_leads(
