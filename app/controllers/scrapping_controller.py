@@ -218,7 +218,6 @@ def list_sectors(
 
     sectors_out: List[SectorOut] = [SectorOut.from_orm(c) for c in sectors]
 
-
     return {
         "data": {
             "sectors": sectors_out,
