@@ -196,17 +196,38 @@ def list_cities(
     cities_out: List[CityOut] = [CityOut.from_orm(c) for c in cities]
 
     return {"data": {"cities": cities_out, "count": len(cities_out)}}
-    
+
 @router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "User"]))])
 def list_sectors(
     db: Session = Depends(get_db),
-    keyword: str | None = Query(None, description="Search by sector name")
+    keyword: str | None = Query(None, description="Search by sector name"),
+    limit: int = Query(20, ge=1, le=100, description="Number of sectors to return"),
+    page: int = Query(1, ge=1, description="Page number for pagination")
 ):
     query = db.query(Sector)
     if keyword:
         query = query.filter(Sector.name.ilike(f"%{keyword}%"))
 
-    sectors = query.order_by(Sector.name.asc()).all()
+    total = query.count()
+    sectors = (
+        query.order_by(Sector.name.asc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+        .all()
+    )
+
     sectors_out: List[SectorOut] = [SectorOut.from_orm(c) for c in sectors]
 
-    return {"data": {"sectors": sectors_out, "count": len(sectors_out)}}
+
+    return {
+        "data": {
+            "sectors": sectors_out,
+            "meta": {
+                "total": total,
+                "count": len(sectors_out),
+                "page": page,
+                "limit": limit,
+                "pages": (total + limit - 1) // limit
+            },
+        }
+    }
