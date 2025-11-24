@@ -65,11 +65,18 @@ def get_user_by_id(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+ALLOWED_ROLES = ["Admin", "User", "Technician"]
 @router.post("/create", response_model=UserResponse, dependencies=[Depends(role_required(["Admin"]))])
 def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
 ):
+    if user_data.role not in ALLOWED_ROLES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid role. Allowed roles are: {', '.join(ALLOWED_ROLES)}"
+        )
+        
     existing = db.query(User).filter(User.email == user_data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
@@ -116,12 +123,20 @@ def update_user(
     if user.name != user_data.name:
         user.name = user_data.name
         updated_fields.append("Name")
+        
     if user.email != user_data.email:
         user.email = user_data.email
         updated_fields.append("Email")
+        
     if user.role != user_data.role:
+        if user_data.role not in ALLOWED_ROLES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid role. Allowed roles are: {', '.join(ALLOWED_ROLES)}"
+            )
         user.role = user_data.role
-        updated_fields.append("role")
+        updated_fields.append("Role")
+        
     if user_data.password:
         user.password = pwd_context.hash(user_data.password)
         updated_fields.append("Password")

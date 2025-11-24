@@ -135,6 +135,7 @@ def update_lead_status(
         "status": lead.lead_status,
         "follow_up_status": lead.follow_up_status
     }
+    
 def validate_double_positive(lead: Lead):
     if lead.lead_status != "Positive lead":
         raise HTTPException(
