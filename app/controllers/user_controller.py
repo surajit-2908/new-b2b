@@ -10,6 +10,7 @@ from app.utils.email import send_user_email
 from passlib.context import CryptContext
 import os
 from app.auth import role_required
+from app.utils.pagination import paginate
 
 router = APIRouter(prefix="/user", tags=["User"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -35,19 +36,19 @@ def get_all_users(
             User.email.ilike(f"%{keyword}%")
         ))
     query = query.order_by(User.created_at.desc())
+    
+    users, meta = paginate(query.order_by(User.created_at.desc()), page, limit)
 
-    total = query.count()
-    users = query.offset((page - 1) * limit).limit(limit).all()
     users_out: List[UserOut] = [UserOut.from_orm(u) for u in users]
 
     return {
         "data": {
             "users": users_out,
             "meta": {
-                "total": total,
-                "page": page,
-                "limit": limit,
-                "pages": (total + limit - 1) // limit,
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
                 "query": keyword,
             }
         }

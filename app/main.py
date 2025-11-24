@@ -6,6 +6,7 @@ from app.controllers import (
     user_controller,
     scrapping_controller,
     user_city_sector_controller,
+    technician_controller,
 )
 from app.database import engine, Base
 
@@ -25,6 +26,7 @@ app.include_router(auth_controller.router)
 app.include_router(user_controller.router)
 app.include_router(scrapping_controller.router)
 app.include_router(user_city_sector_controller.router)
+app.include_router(technician_controller.router)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 

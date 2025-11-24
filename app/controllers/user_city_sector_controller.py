@@ -9,6 +9,7 @@ from app.schemas.lead import LeadOut
 from app.models.user import User
 from app.schemas.user_city_sector_schema import UserCitySectorCreate, UserCitySectorOut
 from app.auth import role_required
+from app.utils.pagination import paginate
 
 router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 
@@ -78,20 +79,16 @@ def get_user_assigned_leads(
         query = query.filter(Lead.city.ilike(f"%{city}%"))
 
     # ✅ Pagination logic
-    total = query.count()
-    leads = query.order_by(Lead.created_at.desc()) \
-                 .offset((page - 1) * limit) \
-                 .limit(limit) \
-                 .all()
+    leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
     serialized_leads = [LeadOut.from_orm(lead) for lead in leads]
 
     return {
         "data": serialized_leads,
         "meta": {
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "pages": (total + limit - 1) // limit,
+            "total": meta["total"],
+            "page": meta["page"],
+            "limit": meta["limit"],
+            "pages": meta["pages"],
             "is_followup": is_followup,
             "user_id": user_id,
             "sector": sector,

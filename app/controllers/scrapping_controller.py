@@ -14,6 +14,7 @@ from app.models.sector import Sector
 from app.schemas.sector import SectorOut
 from dotenv import load_dotenv
 from app.auth import role_required
+from app.utils.pagination import paginate
 
 load_dotenv()
 router = APIRouter(prefix="/leads", tags=["Leads"])
@@ -159,13 +160,7 @@ def get_leads(
     if city:
         query = query.filter(Lead.city == city)
 
-    total = query.count()
-    leads = (
-        query.order_by(Lead.created_at.desc())
-        .offset((page - 1) * limit)
-        .limit(limit)
-        .all()
-    )
+    leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 
     leads_out: List[LeadOut] = [LeadOut.from_orm(l) for l in leads]
 
@@ -173,10 +168,10 @@ def get_leads(
         "data": {
             "leads": leads_out,
             "meta": {
-                "total": total,
-                "page": page,
-                "limit": limit,
-                "pages": (total + limit - 1) // limit,
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
                 "sector": sector,
                 "city": city,
             },
@@ -208,25 +203,13 @@ def list_sectors(
     if keyword:
         query = query.filter(Sector.name.ilike(f"%{keyword}%"))
 
-    total = query.count()
-    sectors = (
-        query.order_by(Sector.name.asc())
-        .offset((page - 1) * limit)
-        .limit(limit)
-        .all()
-    )
+    sectors, meta = paginate(query.order_by(Sector.created_at.desc()), page, limit)
 
     sectors_out: List[SectorOut] = [SectorOut.from_orm(c) for c in sectors]
 
     return {
         "data": {
             "sectors": sectors_out,
-            "meta": {
-                "total": total,
-                "count": len(sectors_out),
-                "page": page,
-                "limit": limit,
-                "pages": (total + limit - 1) // limit
-            },
+            "meta": meta
         }
     }

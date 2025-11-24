@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from app.database import Base
 
 class Lead(Base):
@@ -14,5 +14,6 @@ class Lead(Base):
     summary = Column(String(1024), nullable=True)
     lead_status = Column(String(50), default="new")
     follow_up_status = Column(String(50), default="pending")
+    assigned_technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

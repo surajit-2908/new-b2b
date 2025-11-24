@@ -12,6 +12,7 @@ class LeadOut(BaseModel):
     summary: Optional[str] = None
     lead_status: str
     follow_up_status: str
+    assigned_technician_id: Optional[int]
     created_at: datetime
     updated_at: datetime
 
