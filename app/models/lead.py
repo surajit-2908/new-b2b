@@ -15,5 +15,6 @@ class Lead(Base):
     lead_status = Column(String(50), default="new")
     follow_up_status = Column(String(50), default="pending")
     assigned_technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    triple_positive_timestamp = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

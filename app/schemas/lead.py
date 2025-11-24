@@ -13,6 +13,7 @@ class LeadOut(BaseModel):
     lead_status: str
     follow_up_status: str
     assigned_technician_id: Optional[int]
+    triple_positive_timestamp: Optional[datetime]
     created_at: datetime
     updated_at: datetime
 

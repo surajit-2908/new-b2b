@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from app.database import get_db
 from app.models.user_city_sector import UserCitySector
 from app.models.lead import Lead
@@ -115,12 +115,17 @@ def update_lead_status(
         raise HTTPException(status_code=404, detail="Lead not found")
 
     # Update fields
-    lead.lead_status = status
+
     if status == "Positive lead":
         lead.follow_up_status = "Active"
+    elif  status == "Double Positive":
+       lead = validate_double_positive(lead)
+    elif  status == "Triple Positive":
+       lead = validate_triple_positive(lead)
     else:
         lead.follow_up_status = "Inactive"
-
+    
+    lead.lead_status = status
     db.commit()
     db.refresh(lead)
 
@@ -130,3 +135,21 @@ def update_lead_status(
         "status": lead.lead_status,
         "follow_up_status": lead.follow_up_status
     }
+def validate_double_positive(lead: Lead):
+    if lead.lead_status != "Positive lead":
+        raise HTTPException(
+            status_code=400,
+            detail="Lead must be 'Positive lead' before marking as 'Double Positive'"
+        )
+    lead.follow_up_status = "Active"
+    return lead
+    
+def validate_triple_positive(lead: Lead):
+    if lead.lead_status != "Double Positive":
+        raise HTTPException(
+            status_code=400,
+            detail="Lead must be 'Double Positive' before marking as 'Triple Positive'"
+        )
+    lead.follow_up_status = "Active" 
+    lead.triple_positive_timestamp = func.now()  
+    return lead
