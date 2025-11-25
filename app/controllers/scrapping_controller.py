@@ -213,3 +213,13 @@ def list_sectors(
             "meta": meta
         }
     }
+
+@router.get("/{lead_id}", response_model=LeadOut, dependencies=[Depends(role_required(["Admin", "Technician"]))])   
+def get_lead_by_id(
+    lead_id: int,
+    db: Session = Depends(get_db)
+):
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return lead 
