@@ -18,7 +18,9 @@ router = APIRouter(prefix="/technician", tags=["Technician"])
 def get_unassigned_triple_positive_leads(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number"),
-    limit: int = Query(10, ge=1, le=100, description="Leads per page")
+    limit: int = Query(10, ge=1, le=100, description="Leads per page"),
+    sector: str | None = Query(None, description="Filter by business sector"),
+    city: str | None = Query(None, description="Filter by city")
 ):
     """
     List leads where:
@@ -30,6 +32,12 @@ def get_unassigned_triple_positive_leads(
         Lead.assigned_technician_id.is_(None)
     )
 
+    # Apply filters dynamically
+    if sector:
+        query = query.filter(Lead.sector == sector)
+    if city:
+        query = query.filter(Lead.city == city)
+
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 
     leads_out: List[LeadOut] = [LeadOut.from_orm(l) for l in leads]
@@ -37,7 +45,14 @@ def get_unassigned_triple_positive_leads(
     return {
         "data": {
             "leads": leads_out,
-            "meta": meta
+            "meta": {
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
+                "sector": sector,
+                "city": city,
+            },
         }
     }
 
