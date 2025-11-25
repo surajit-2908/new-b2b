@@ -1,0 +1,16 @@
+from sqlalchemy.orm import Session
+from app.models.lead_free_notes import LeadFreeNotes
+from app.schemas.lead_free_notes import LeadFreeNoteCreate
+from datetime import datetime
+
+
+def create_free_note(db: Session, data: LeadFreeNoteCreate):
+        note = LeadFreeNotes(
+            notes=data.notes,
+            lead_id=data.lead_id,
+            created_by=data.created_by
+        )
+        db.add(note)
+        db.commit()
+        db.refresh(note)
+        return note
