@@ -214,7 +214,7 @@ def list_sectors(
         }
     }
 
-@router.get("/{lead_id}", response_model=LeadOut, dependencies=[Depends(role_required(["Admin", "Technician"]))])   
+@router.get("/{lead_id}", response_model=LeadOut, dependencies=[Depends(role_required(["Admin", "Technician", "User"]))])   
 def get_lead_by_id(
     lead_id: int,
     db: Session = Depends(get_db)

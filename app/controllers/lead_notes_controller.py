@@ -20,7 +20,6 @@ async def assign_sector_city(data: LeadFreeNoteCreate, db: Session = Depends(get
         raise HTTPException(status_code=404, detail="User not found")
     
     lead = db.query(Lead).filter(Lead.id == data.lead_id).first()
-    
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
     
