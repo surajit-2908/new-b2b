@@ -41,7 +41,7 @@ async def assign_sector_city(data: LeadFreeNoteCreate, db: Session = Depends(get
     dependencies=[Depends(role_required(["Admin", "Technician", "User"]))],
 )
 def get_lead_notes(lead_id: int, db: Session = Depends(get_db)):
-    lead_note = db.query(LeadFreeNotes).filter(LeadFreeNotes.lead_id == lead_id).all()
+    lead_note = db.query(LeadFreeNotes).filter(LeadFreeNotes.lead_id == lead_id).order_by(LeadFreeNotes.created_at.desc()).all()
     if not lead_note:
         raise HTTPException(status_code=404, detail="No notes found for this lead")
 
