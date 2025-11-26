@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 class LeadFreeNotes(Base):
@@ -14,3 +15,6 @@ class LeadFreeNotes(Base):
     
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=True)
+    
+    created_user = relationship("User", foreign_keys=[created_by])
+    updated_user = relationship("User", foreign_keys=[updated_by])
