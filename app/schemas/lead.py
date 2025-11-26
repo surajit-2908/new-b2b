@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from app.schemas.user import UserOut
 
 class LeadOut(BaseModel):
     id: int
@@ -13,6 +14,9 @@ class LeadOut(BaseModel):
     lead_status: str
     follow_up_status: str
     assigned_technician_id: Optional[int]
+    
+    assigned_technician: Optional[UserOut] = None
+
     triple_positive_timestamp: Optional[datetime]
     created_at: datetime
     updated_at: datetime

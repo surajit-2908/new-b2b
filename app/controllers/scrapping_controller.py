@@ -15,6 +15,7 @@ from app.schemas.sector import SectorOut
 from dotenv import load_dotenv
 from app.auth import role_required
 from app.utils.pagination import paginate
+from sqlalchemy.orm import joinedload
 
 load_dotenv()
 router = APIRouter(prefix="/leads", tags=["Leads"])
@@ -219,7 +220,12 @@ def get_lead_by_id(
     lead_id: int,
     db: Session = Depends(get_db)
 ):
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    lead = (
+        db.query(Lead)
+        .options(joinedload(Lead.assigned_technician))
+        .filter(Lead.id == lead_id)
+        .first()
+    )
     if not lead:
         raise HTTPException(status_code=404, detail="Lead not found")
     return lead 

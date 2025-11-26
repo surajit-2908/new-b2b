@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from app.database import Base
+from sqlalchemy.orm import relationship
 
 class Lead(Base):
     __tablename__ = "leads"
@@ -18,3 +19,9 @@ class Lead(Base):
     triple_positive_timestamp = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    assigned_technician = relationship(
+            "User",
+            back_populates="leads_assigned",
+            lazy="joined"        # ensures auto-join
+        )

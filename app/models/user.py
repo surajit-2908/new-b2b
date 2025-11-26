@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 from app.database import Base
 from passlib.context import CryptContext
+from sqlalchemy.orm import relationship
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,3 +23,5 @@ class User(Base):
     def set_password(self, password: str):
         """Hash and set the password"""
         self.password = pwd_context.hash(password)
+
+    leads_assigned = relationship("Lead", back_populates="assigned_technician")
