@@ -20,7 +20,6 @@ class LeadFreeNoteUpdate(BaseModel):
 
 class LeadFreeNoteItem(BaseModel):
     id: int
-    lead_id: int
     notes: str
     created_at: datetime
     updated_at: datetime | None
