@@ -23,12 +23,10 @@ class LeadFreeNoteItem(BaseModel):
     notes: str
     created_at: datetime
     updated_at: datetime | None
-    created_by: UserOut | None
-    updated_by: UserOut | None
+    created_by_user: UserOut | None
+    updated_by_user: UserOut | None
 
-
-class Config:
-    from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class LeadFreeNotesResponse(BaseModel):
