@@ -43,7 +43,7 @@ async def assign_sector_city(data: LeadFreeNoteCreate, db: Session = Depends(get
 def get_lead_notes(lead_id: int, db: Session = Depends(get_db)):
     lead_note = db.query(LeadFreeNotes).filter(LeadFreeNotes.lead_id == lead_id).order_by(LeadFreeNotes.created_at.desc()).all()
     if not lead_note:
-        raise HTTPException(status_code=404, detail="No notes found for this lead")
+       return {"lead_id": lead_id, "free_notes": []}
 
     lead_notes: List[LeadFreeNoteItem] = [
         LeadFreeNoteItem.model_validate(note) for note in lead_note
