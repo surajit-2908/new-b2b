@@ -19,7 +19,7 @@ router = APIRouter(prefix="/lead-notes", tags=["Lead Notes"])
 
 
 @router.post(
-    "/add-notes", response_model=dict, dependencies=[Depends(role_required(["Admin"]))]
+    "/add-notes", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "User"]))]
 )
 async def assign_sector_city(data: LeadFreeNoteCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == data.created_by).first()
