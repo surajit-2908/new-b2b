@@ -21,4 +21,4 @@ class TechnicalContext(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     # relationships
-    deal = relationship("Deals", back_populates="technical_context", lazy="joined")
+    deal = relationship("Deal", back_populates="technical_context", lazy="joined")

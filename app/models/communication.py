@@ -20,4 +20,4 @@ class Communication(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     # relationships
-    deal = relationship("Deals", back_populates="communication", lazy="joined")
+    deal = relationship("Deal", back_populates="communication", lazy="joined")
