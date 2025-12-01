@@ -25,3 +25,5 @@ class Lead(Base):
             back_populates="leads_assigned",
             lazy="joined"        # ensures auto-join
         )
+
+    deals = relationship("Deals", back_populates="lead")

@@ -37,5 +37,6 @@ class Deals(Base):
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    # Relationship (optional)
-    lead = relationship("Leads", back_populates="deals", lazy="joined")
+    # Relationship
+    lead = relationship("Lead", back_populates="deals", lazy="joined")
+    work_packages = relationship("WorkPackages", back_populates="deal")
