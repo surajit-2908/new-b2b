@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class Deals(Base):
+class Deal(Base):
     __tablename__ = "deals"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -39,4 +39,7 @@ class Deals(Base):
 
     # Relationship
     lead = relationship("Lead", back_populates="deals", lazy="joined")
-    work_packages = relationship("WorkPackages", back_populates="deal")
+    work_package = relationship("WorkPackage", back_populates="deal")
+    technical_context = relationship("TechnicalContext", back_populates="deal")
+    communication = relationship("Communication", back_populates="deal")
+    

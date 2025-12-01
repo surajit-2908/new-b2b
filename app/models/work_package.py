@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class WorkPackages(Base):
+class WorkPackage(Base):
     __tablename__ = "work_packages"
 
     id = Column(Integer, primary_key=True, index=True)
