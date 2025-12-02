@@ -12,6 +12,7 @@ from app.models.work_package import WorkPackage
 from app.models.technical_context import TechnicalContext
 from app.models.communication import Communication
 from app.models.lead_free_notes import LeadFreeNotes
+from app.models.internal_notes import InternalNote
 
 
 # NOTE:
