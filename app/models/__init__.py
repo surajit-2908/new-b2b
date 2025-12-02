@@ -11,8 +11,8 @@ from app.models.deal import Deal
 from app.models.work_package import WorkPackage
 from app.models.technical_context import TechnicalContext
 from app.models.communication import Communication
-from app.models.lead_free_notes import LeadFreeNotes
-from app.models.internal_notes import InternalNote
+from app.models.lead_free_note import LeadFreeNote
+from app.models.internal_note import InternalNote
 
 
 # NOTE:

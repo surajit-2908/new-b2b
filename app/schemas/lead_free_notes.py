@@ -29,7 +29,7 @@ class LeadFreeNoteItem(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class LeadFreeNotesResponse(BaseModel):
+class LeadFreeNoteResponse(BaseModel):
     lead_id: int
     free_notes: List[LeadFreeNoteItem]
     template_notes: List[str] = []

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
-class LeadFreeNotes(Base):
+class LeadFreeNote(Base):
     __tablename__ = "lead_free_notes"
 
     id = Column(Integer, primary_key=True, index=True)
