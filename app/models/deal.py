@@ -42,4 +42,4 @@ class Deal(Base):
     work_package = relationship("WorkPackage", back_populates="deal")
     technical_context = relationship("TechnicalContext", back_populates="deal")
     communication = relationship("Communication", back_populates="deal")
-    
+    internal_notes = relationship("InternalNote", back_populates="deal")
