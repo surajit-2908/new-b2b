@@ -33,5 +33,5 @@ class WorkPackage(Base):
     last_saved_at = Column(DateTime, server_default=func.now(), nullable=True)
 
     # Relationship
-    deal = relationship("Deal", back_populates="work_packages", lazy="joined")
+    deal = relationship("Deal", back_populates="work_package", lazy="joined")
     

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
@@ -8,10 +8,8 @@ from sqlalchemy.dialects.postgresql import UUID
 class TechnicalContext(Base):
     __tablename__ = "technical_contexts"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-
-    deal_id = Column(UUID(as_uuid=True), ForeignKey("deals.id"), nullable=False)
-
+    id = Column(Integer, primary_key=True, index=True)
+    deal_id = Column(Integer, ForeignKey("deals.id"), nullable=False)
     client_main_systems = Column(Text, nullable=False)
     integration_targets = Column(Text, nullable=True)
     tools_in_scope = Column(Text, nullable=False)

@@ -7,6 +7,12 @@ from app.database import Base
 from app.models.user import User
 from app.models.lead import Lead
 from app.models.user_city_sector import UserCitySector
+from app.models.deal import Deal
+from app.models.work_package import WorkPackage
+from app.models.technical_context import TechnicalContext
+from app.models.communication import Communication
+from app.models.lead_free_notes import LeadFreeNotes
+
 
 # NOTE:
 # Do NOT redefine Base here.

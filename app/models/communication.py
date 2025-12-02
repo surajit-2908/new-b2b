@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, func
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
@@ -8,9 +8,9 @@ from sqlalchemy.dialects.postgresql import UUID
 class Communication(Base):
     __tablename__ = "communications"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, index=True)
 
-    deal_id = Column(UUID(as_uuid=True), ForeignKey("deals.id"), nullable=False)
+    deal_id = Column(Integer, ForeignKey("deals.id"), nullable=False)
 
     client_project_contact_name = Column(Text, nullable=False)
     client_project_contact_email = Column(Text, nullable=False)
