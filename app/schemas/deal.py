@@ -29,3 +29,41 @@ class DealCreate(BaseModel):
 
     status: str | None = "draft"        # draft / active
     draft_version: int | None = None
+    
+class SectorPackageOut(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True   
+class DealOut(BaseModel):
+    id: int
+    lead_id: int
+    client_name: str
+    primary_contact_name: str | None
+    primary_contact_email: str | None
+    primary_contact_phone: str | None
+    industry: str | None
+
+    sector_package: SectorPackageOut | None
+    custom_sector_package: str | None
+
+    deal_name: str
+    salesperson_name: str | None
+    deal_close_date: datetime | None
+
+    expected_start_date: datetime | None
+    expected_end_date_or_deadline: datetime | None
+
+    client_approved_scope_summary: str | None
+    special_terms: str | None
+
+    status: str
+    draft_version: int | None
+
+    class Config:
+        orm_mode = True
+
+
+class MessageResponse(BaseModel):
+    message: str        

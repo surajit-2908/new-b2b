@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models.lead import Lead
 from app.models.deal import Deal
 from app.models.sector_package import SectorPackage
-from app.schemas.deal import DealCreate
+from app.schemas.deal import DealCreate, DealOut, MessageResponse
 from app.schemas.sector_package import SectorPackageResponse
 from app.auth import role_required
 
@@ -122,3 +122,14 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
     db.refresh(new_deal)
 
     return {"message": "Deal created successfully"}
+
+
+@router.get("/{lead_id}", response_model=DealOut | MessageResponse)
+def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve deal information by lead ID."""
+    deal = db.query(Deal).filter(Deal.lead_id == lead_id).first()
+    if not deal:
+        return {"message": "No deal found for this lead"}
+
+    return deal
