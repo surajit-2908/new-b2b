@@ -12,7 +12,8 @@ class DealCreate(BaseModel):
 
     industry: str | None = None
 
-    sector_package: str
+    sector_package_id: int
+    custom_sector_package: str | None = None
     deal_name: str
     salesperson_name: str
 

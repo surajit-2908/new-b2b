@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.lead import Lead
 from app.models.lead_free_note import LeadFreeNote
 from app.models.user import User
-from app.schemas.lead_free_notes import (
+from app.schemas.lead_free_note import (
     LeadFreeNoteCreate,
     LeadFreeNoteItem,
     LeadFreeNoteResponse,

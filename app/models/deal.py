@@ -18,7 +18,11 @@ class Deal(Base):
 
     industry = Column(String(100), nullable=True)
 
-    sector_package = Column(String(150), nullable=False)
+    # NEW FIELD — store ID instead of name
+    sector_package_id = Column(Integer, ForeignKey("sector_packages.id"), nullable=False)
+
+    # Only used if “Other (Specify)”
+    custom_sector_package = Column(String(200), nullable=True)
 
     deal_name = Column(Text, nullable=False)
     salesperson_name = Column(String(150), nullable=False)
@@ -38,8 +42,9 @@ class Deal(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
-    lead = relationship("Lead", back_populates="deals", lazy="joined")
+    lead = relationship("Lead", back_populates="deal")
     work_package = relationship("WorkPackage", back_populates="deal")
     technical_context = relationship("TechnicalContext", back_populates="deal")
-    communication = relationship("Communication", back_populates="deal")
-    internal_notes = relationship("InternalNote", back_populates="deal")
+    communication = relationship("Communication", back_populates="deal")  
+    internal_note = relationship("InternalNote", back_populates="deal")  
+    sector_package = relationship("SectorPackage", back_populates="deal")  

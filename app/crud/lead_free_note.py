@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.lead_free_note import LeadFreeNote
-from app.schemas.lead_free_notes import LeadFreeNoteCreate
+from app.schemas.lead_free_note import LeadFreeNoteCreate
 
 
 def create_free_note(db: Session, data: LeadFreeNoteCreate):

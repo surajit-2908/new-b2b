@@ -19,5 +19,5 @@ class InternalNote(Base):
     created_at = Column(DateTime, default=func.now(), nullable=False)
     
     # Relationship
-    deal = relationship("Deal", back_populates="internal_notes", lazy="joined")
+    deal = relationship("Deal", back_populates="internal_note", lazy="joined")
     
