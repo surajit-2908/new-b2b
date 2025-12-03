@@ -16,9 +16,17 @@ router = APIRouter(prefix="/deals", tags=["Deals"])
 def list_sector_packages(db: Session = Depends(get_db)):
     """
     Fetch all sector packages for dropdown.
+    Ensure 'Other (Specify)' appears at the bottom.
     """
-    packages = db.query(SectorPackage).order_by(SectorPackage.id.asc()).all()
-    return packages
+    packages = db.query(SectorPackage).order_by(SectorPackage.name.asc()).all()
+
+    # Move "Other (Specify)" to the bottom
+    packages_sorted = sorted(
+        packages,
+        key=lambda p: (p.name == "Other (Specify)", p.name)
+    )
+
+    return packages_sorted
 
 
 @router.post(
