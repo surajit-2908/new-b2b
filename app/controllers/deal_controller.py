@@ -29,6 +29,17 @@ def list_sector_packages(db: Session = Depends(get_db)):
     return packages_sorted
 
 
+@router.get("/{lead_id}", response_model=DealOut | MessageResponse)
+def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve deal information by lead ID."""
+    deal = db.query(Deal).filter(Deal.lead_id == lead_id).first()
+    if not deal:
+        return {"message": "No deal found for this lead"}
+
+    return deal
+
+
 @router.post(
     "/save",
     response_model=dict,
@@ -122,14 +133,3 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
     db.refresh(new_deal)
 
     return {"message": "Deal created successfully"}
-
-
-@router.get("/{lead_id}", response_model=DealOut | MessageResponse)
-def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
-    """
-    Retrieve deal information by lead ID."""
-    deal = db.query(Deal).filter(Deal.lead_id == lead_id).first()
-    if not deal:
-        return {"message": "No deal found for this lead"}
-
-    return deal

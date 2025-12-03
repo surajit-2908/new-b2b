@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from app.schemas.sector_package import SectorPackageResponse
 
 class DealCreate(BaseModel):
     lead_id: int
@@ -29,13 +30,7 @@ class DealCreate(BaseModel):
 
     status: str | None = "draft"        # draft / active
     draft_version: int | None = None
-    
-class SectorPackageOut(BaseModel):
-    id: int
-    name: str
-
-    class Config:
-        orm_mode = True   
+        
 class DealOut(BaseModel):
     id: int
     lead_id: int
@@ -45,7 +40,7 @@ class DealOut(BaseModel):
     primary_contact_phone: str | None
     industry: str | None
 
-    sector_package: SectorPackageOut | None
+    sector_package: SectorPackageResponse | None
     custom_sector_package: str | None
 
     deal_name: str
