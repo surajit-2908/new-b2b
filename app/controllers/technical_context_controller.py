@@ -60,7 +60,7 @@ def create_or_update_technical_context(data: TechnicalContextCreate, db: Session
 
 
 @router.get("/{deal_id}", response_model=TechnicalContextOut | MessageResponse)
-def get_deal_by_lead(deal_id: int, db: Session = Depends(get_db)):
+def get_technical_context_by_deal(deal_id: int, db: Session = Depends(get_db)):
     """
     Retrieve Technical Context by deal ID."""
     technical_context = db.query(TechnicalContext).filter(TechnicalContext.deal_id == deal_id).first()
