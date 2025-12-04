@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.controllers import (
     auth_controller,
     deal_controller,
+    internal_note_controller,
     lead_note_controller,
     technical_context_controller,
     user_controller,
@@ -33,7 +34,7 @@ app.include_router(technician_controller.router)
 app.include_router(lead_note_controller.router)
 app.include_router(deal_controller.router)
 app.include_router(technical_context_controller.router)
-
+app.include_router(internal_note_controller.router)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.on_event("startup")
