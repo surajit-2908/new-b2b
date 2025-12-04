@@ -1,3 +1,4 @@
+from app.schemas.message_response import MessageResponse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -5,7 +6,7 @@ from app.database import get_db
 from app.models.lead import Lead
 from app.models.deal import Deal
 from app.models.sector_package import SectorPackage
-from app.schemas.deal import DealCreate, DealOut, MessageResponse
+from app.schemas.deal import DealCreate, DealOut
 from app.schemas.sector_package import SectorPackageResponse
 from app.auth import role_required
 
