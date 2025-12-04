@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.controllers import (
     auth_controller,
+    communication_controller,
     deal_controller,
     lead_note_controller,
     technical_context_controller,
@@ -33,6 +34,7 @@ app.include_router(technician_controller.router)
 app.include_router(lead_note_controller.router)
 app.include_router(deal_controller.router)
 app.include_router(technical_context_controller.router)
+app.include_router(communication_controller.router)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
