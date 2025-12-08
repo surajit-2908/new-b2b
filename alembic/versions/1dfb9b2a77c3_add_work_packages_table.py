@@ -46,4 +46,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table("deals")
+    op.drop_table("work_packages")
