@@ -23,6 +23,7 @@ class WorkPackage(Base):
     package_title = Column(Text, nullable=False)
     package_type_id = Column(Integer, ForeignKey("package_types.id"), nullable=False)
     package_summary = Column(Text, nullable=False)
+    custom_package_type = Column(Text, nullable=True)
 
     key_deliverables = Column(Text, nullable=False)
     acceptance_criteria = Column(Text, nullable=False)

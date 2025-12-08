@@ -33,6 +33,8 @@ def upgrade():
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
         sa.Column("deal_id", sa.Integer(), sa.ForeignKey("deals.id"), nullable=False),
         sa.Column("package_type_id", sa.Integer(), sa.ForeignKey("package_types.id"), nullable=False),
+        # Only used if “Other (Specify)”
+        sa.Column("custom_package_type", sa.Text(), nullable=True),
 
         sa.Column("package_title", sa.Text(), nullable=False),
         sa.Column("package_summary", sa.Text(), nullable=False),
