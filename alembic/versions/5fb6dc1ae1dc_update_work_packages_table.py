@@ -53,8 +53,7 @@ def upgrade():
         sa.Column("status", sa.String(100), nullable=True),
         sa.Column("draft_version", sa.Integer(), nullable=True),
 
-        sa.Column("last_saved_at", sa.DateTime(),
-                  server_default=sa.func.now(), nullable=True),
+        sa.Column("last_saved_at", sa.DateTime(), server_default=sa.func.now(), nullable=True),
     )
 
 
