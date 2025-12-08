@@ -36,8 +36,8 @@ app.include_router(lead_note_controller.router)
 app.include_router(deal_controller.router)
 app.include_router(technical_context_controller.router)
 app.include_router(communication_controller.router)
-
 app.include_router(internal_note_controller.router)
+
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.on_event("startup")
