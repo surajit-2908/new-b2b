@@ -1,5 +1,13 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, DateTime, Numeric, ForeignKey, func
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    Numeric,
+    ForeignKey,
+    func,
+    JSON,
 )
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -13,13 +21,13 @@ class WorkPackage(Base):
     deal_id = Column(Integer, ForeignKey("deals.id"), nullable=False)
 
     package_title = Column(Text, nullable=False)
-    package_type = Column(String(150), nullable=False)
+    package_type_id = Column(Integer, ForeignKey("package_types.id"), nullable=False)
     package_summary = Column(Text, nullable=False)
 
     key_deliverables = Column(Text, nullable=False)
     acceptance_criteria = Column(Text, nullable=False)
-    required_skills = Column(Text, nullable=False)
-    primary_tools = Column(Text, nullable=False)
+    required_skills_ids = Column(JSON, nullable=False)
+    primary_tools_ids = Column(JSON, nullable=False)
 
     package_estimated_complexity = Column(Text, nullable=False)
 
@@ -34,4 +42,4 @@ class WorkPackage(Base):
 
     # Relationship
     deal = relationship("Deal", back_populates="work_package", lazy="joined")
-    
+    package_type = relationship("PackageType", back_populates="work_package", lazy="joined")
