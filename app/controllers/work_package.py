@@ -2,11 +2,11 @@ from app.database import get_db
 from app.models.package_type import PackageType
 from app.models.skill import Skill
 from app.models.tool import Tool
-from app.schemas.web_package import PackageTypeOut, SkillsOut, ToolsOut
+from app.schemas.work_package import PackageTypeOut, SkillsOut, ToolsOut
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix="/web-package", tags=["Web Package"])
+router = APIRouter(prefix="/work-package", tags=["Work Package"])
 
 
 @router.get("/get-package-types", response_model=list[PackageTypeOut])

@@ -12,7 +12,7 @@ from app.controllers import (
     scrapping_controller,
     user_city_sector_controller,
     technician_controller,
-    web_package,
+    work_package,
 )
 from app.database import engine, Base
 
@@ -38,7 +38,7 @@ app.include_router(deal_controller.router)
 app.include_router(technical_context_controller.router)
 app.include_router(communication_controller.router)
 app.include_router(internal_note_controller.router)
-app.include_router(web_package.router)
+app.include_router(work_package.router)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
