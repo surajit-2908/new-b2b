@@ -1,3 +1,4 @@
+from app.auth import role_required
 from app.database import get_db
 from app.models.deal import Deal
 from app.models.package_type import PackageType
@@ -37,10 +38,18 @@ def get_tools(db: Session = Depends(get_db)):
     return tools
 
 
-@router.post("/save")
+@router.post(
+    "/save",
+    response_model=dict,
+    dependencies=[Depends(role_required(["Admin", "User"]))],
+)
 def create_or_update_work_packages(
     data: WorkPackageCreate, db: Session = Depends(get_db)
 ):
+    """
+    Create or update work for a deal.
+    """
+    
     # Validate deal
     deal = db.query(Deal).filter(Deal.id == data.deal_id).first()
     if not deal:
@@ -57,9 +66,10 @@ def create_or_update_work_packages(
         if not exists:
             raise HTTPException(status_code=400, detail="Invalid package type id")
 
-        # Validate skills/tools
+        # Validate skills/tools/dependencies
         validate_tool_ids(pkg.primary_tools_ids, db)
         validate_skill_ids(pkg.required_skills_ids, db)
+        validate_dependencies_ids(pkg.dependencies_ids, db)
 
         # UPDATE
         if pkg.package_id:
@@ -78,7 +88,7 @@ def create_or_update_work_packages(
             wp.primary_tools_ids = pkg.primary_tools_ids
             wp.package_estimated_complexity = pkg.package_estimated_complexity
             wp.package_price_allocation = pkg.package_price_allocation
-            wp.dependencies = pkg.dependencies
+            wp.dependencies_ids = pkg.dependencies_ids
             wp.status = "draft"
 
             saved_packages.append(wp)
@@ -97,7 +107,7 @@ def create_or_update_work_packages(
                 primary_tools_ids=pkg.primary_tools_ids,
                 package_estimated_complexity=pkg.package_estimated_complexity,
                 package_price_allocation=pkg.package_price_allocation,
-                dependencies=pkg.dependencies,
+                dependencies_ids=pkg.dependencies_ids,
                 status="draft",
                 draft_version=1,
             )
@@ -142,5 +152,23 @@ def validate_skill_ids(skill_ids: list[int], db: Session):
 
     if missing:
         raise HTTPException(status_code=400, detail="Invalid skill ids")
+
+    return True
+
+
+def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
+    if not dependencies_ids:
+        raise HTTPException(status_code=400, detail="dependencies id is required")
+
+    # Get existing skill IDs from DB
+    existing_ids = db.query(PackageType.id).filter(PackageType.id.in_(dependencies_ids)).all()
+
+    existing_ids = [t[0] for t in existing_ids]
+
+    # Find missing IDs
+    missing = set(dependencies_ids) - set(existing_ids)
+
+    if missing:
+        raise HTTPException(status_code=400, detail="Invalid dependencies ids")
 
     return True

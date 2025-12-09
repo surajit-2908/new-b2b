@@ -34,7 +34,7 @@ class WorkPackage(Base):
 
     package_price_allocation = Column(Numeric, nullable=True)
 
-    dependencies = Column(Text, nullable=False)  # stored as text (JSON string)
+    dependencies_ids =  Column(JSON, nullable=False)
 
     status = Column(String(100), nullable=True)  # draft / active
     draft_version = Column(Integer, nullable=True)

@@ -9,7 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy import inspect
 
 # revision identifiers, used by Alembic.
 revision: str = 'a368a1c8214d'
@@ -19,12 +19,16 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade():
-    op.create_table(
-        "skills",
-        sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
-        sa.Column("name", sa.String(255), nullable=False, unique=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.func.now())
-    )
+    bind = op.get_bind()
+    inspector = inspect(bind)
+
+    if "skills" not in inspector.get_table_names():
+        op.create_table(
+            "skills",
+            sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
+            sa.Column("name", sa.String(255), nullable=False, unique=True),
+            sa.Column("created_at", sa.DateTime(), server_default=sa.func.now())
+        )
 
 def downgrade():
     op.drop_table("skills")

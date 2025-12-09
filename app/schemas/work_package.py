@@ -37,7 +37,7 @@ class PackageBase(BaseModel):
     primary_tools_ids: List[int]
     package_estimated_complexity: str
     package_price_allocation: Optional[int] = None
-    dependencies: str
+    dependencies_ids: List[int]
 
 
 class WorkPackageCreate(BaseModel):
