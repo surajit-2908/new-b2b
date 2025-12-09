@@ -40,7 +40,6 @@ def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)
 
     db.add(new_assignment)
     db.commit()
-    db.refresh(new_assignment)
 
     return {
         "message": "Sector and City assigned successfully"

@@ -38,7 +38,6 @@ def create_or_update_internal_note(data: InternalNoteCreate, db: Session = Depen
         internal_note.internal_notes = data.internal_notes
         
         db.commit()
-        db.refresh(internal_note)
 
         return {"message": "Internal note updated successfully"}
         
@@ -52,7 +51,7 @@ def create_or_update_internal_note(data: InternalNoteCreate, db: Session = Depen
         )
         db.add(internal_note)
         db.commit()
-        db.refresh(internal_note)
+
         return {"message": "Internal note saved successfully"}
 
 

@@ -100,7 +100,6 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
         existing_deal.draft_version = data.draft_version
 
         db.commit()
-        db.refresh(existing_deal)
 
         return {"message": "Deal updated successfully"}
 
@@ -131,6 +130,5 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
 
     db.add(new_deal)
     db.commit()
-    db.refresh(new_deal)
 
     return {"message": "Deal created successfully"}

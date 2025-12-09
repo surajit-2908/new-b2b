@@ -39,7 +39,6 @@ def create_or_update_communication(data: CommunicationCreate, db: Session = Depe
         communication.preferred_channel = data.preferred_channel
         communication.update_frequency = data.update_frequency
         db.commit()
-        db.refresh(communication)
 
         return {"message": "Communication updated successfully"}
         
@@ -54,7 +53,6 @@ def create_or_update_communication(data: CommunicationCreate, db: Session = Depe
         )
         db.add(communication)
         db.commit()
-        db.refresh(communication)
         return {"message": "Communication saved successfully"}
 
 

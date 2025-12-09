@@ -55,8 +55,6 @@ def create_or_update_work_packages(
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found.")
 
-    saved_packages = []
-
     for pkg in data.packages:
         # Validate package type
         exists = (
@@ -91,8 +89,6 @@ def create_or_update_work_packages(
             wp.dependencies_ids = pkg.dependencies_ids
             wp.status = "draft"
 
-            saved_packages.append(wp)
-
         # CREATE
         else:
             new_wp = WorkPackage(
@@ -113,7 +109,6 @@ def create_or_update_work_packages(
             )
 
             db.add(new_wp)
-            saved_packages.append(new_wp)
 
     db.commit()
 

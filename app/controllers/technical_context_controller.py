@@ -39,7 +39,6 @@ def create_or_update_technical_context(data: TechnicalContextCreate, db: Session
         tech_context.access_required_list = data.access_required_list
         tech_context.credential_provision_method = data.credential_provision_method
         db.commit()
-        db.refresh(tech_context)
 
         return {"message": "Technical context updated successfully"}
         
@@ -55,7 +54,7 @@ def create_or_update_technical_context(data: TechnicalContextCreate, db: Session
         )
         db.add(tech_context)
         db.commit()
-        db.refresh(tech_context)
+
         return {"message": "Technical context saved successfully"}
 
 
