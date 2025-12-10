@@ -48,4 +48,26 @@ class WorkPackageCreate(BaseModel):
 
     class Config:
         from_attributes = True
- 
+
+
+class PackageBaseOut(BaseModel):
+    id: Optional[int] = None
+    package_title: str
+    package_type: PackageTypeOut
+    package_summary: str
+    custom_package_type: Optional[str] = None
+    key_deliverables: str
+    acceptance_criteria: str
+    required_skills: List[SkillsOut]
+    primary_tools: List[ToolsOut]
+    package_estimated_complexity: str
+    package_price_allocation: Optional[int] = None
+    dependencies: List[BaseClass]
+
+    class Config:
+        from_attributes = True
+
+
+class WorkPackageOut(BaseModel):
+    deal_id: int
+    packages: List[PackageBaseOut]

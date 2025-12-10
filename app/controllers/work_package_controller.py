@@ -7,10 +7,12 @@ from app.models.tool import Tool
 from app.models.work_package import WorkPackage
 from app.schemas.message_response import MessageResponse
 from app.schemas.work_package import (
+    PackageBaseOut,
     PackageTypeOut,
     SkillsOut,
     ToolsOut,
     WorkPackageCreate,
+    WorkPackageOut,
 )
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
@@ -172,16 +174,64 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
     return True
 
 
-@router.get("/{deal_id}", response_model=WorkPackageCreate | MessageResponse)
+@router.get("/{deal_id}", response_model=WorkPackageOut | MessageResponse)
 def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
     """
-    Retrieve work packages by deal ID."""
+    Retrieve work packages by deal ID.
+    """
     packages = db.query(WorkPackage).filter(WorkPackage.deal_id == deal_id).all()
 
     if not packages:
         return {"message": "No work packages found for this deal"}
 
-    return WorkPackageCreate(deal_id=deal_id, packages=packages)
+    formatted_packages = []
+
+    for pkg in packages:
+        
+        skills = []
+        if pkg.required_skills_ids:
+            skills = (
+                db.query(Skill)
+                .filter(Skill.id.in_(pkg.required_skills_ids))
+                .all()
+            )
+
+        tools = []
+        if pkg.primary_tools_ids:
+            tools = (
+                db.query(Tool)
+                .filter(Tool.id.in_(pkg.primary_tools_ids))
+                .all()
+            )
+
+       
+        dependencies = []
+        if pkg.dependencies_ids:
+            dependencies = (
+                db.query(PackageType)
+                .filter(PackageType.id.in_(pkg.dependencies_ids))
+                .all()
+            )
+
+        formatted_packages.append(
+            PackageBaseOut(
+                id=pkg.id,
+                package_title=pkg.package_title,
+                package_type=pkg.package_type,   
+                package_summary=pkg.package_summary,
+                custom_package_type=pkg.custom_package_type,
+                key_deliverables=pkg.key_deliverables,
+                acceptance_criteria=pkg.acceptance_criteria,
+                required_skills=skills,    
+                primary_tools=tools,        
+                dependencies=dependencies,  
+                package_estimated_complexity=pkg.package_estimated_complexity,
+                package_price_allocation=pkg.package_price_allocation,
+            )
+        )
+
+    return WorkPackageOut(deal_id=deal_id, packages=formatted_packages)
+
 
 
 @router.delete(
