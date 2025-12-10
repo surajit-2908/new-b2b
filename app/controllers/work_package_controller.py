@@ -184,7 +184,11 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
     return WorkPackageCreate(deal_id=deal_id, packages=packages)
 
 
-@router.delete("/{package_id}", response_model=MessageResponse)
+@router.delete(
+    "/{package_id}",
+    response_model=MessageResponse,
+    dependencies=[Depends(role_required(["Admin", "User"]))],
+)
 def delete_work_packages(package_id: int, db: Session = Depends(get_db)):
     """
     Delete work packages by package Id."""
