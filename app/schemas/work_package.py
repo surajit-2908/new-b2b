@@ -8,9 +8,8 @@ class BaseClass(BaseModel):
     name: str
     created_at: datetime
 
-
-class Config:
-    from_attributes = True
+    class Config:
+        from_attributes = True
 
 
 class PackageTypeOut(BaseClass):
@@ -26,7 +25,7 @@ class ToolsOut(BaseClass):
 
 
 class PackageBase(BaseModel):
-    package_id : Optional[int] = None
+    package_id: Optional[int] = None
     package_title: str
     package_type_id: int
     package_summary: str
@@ -39,7 +38,13 @@ class PackageBase(BaseModel):
     package_price_allocation: Optional[int] = None
     dependencies_ids: List[int]
 
+    class Config:
+        from_attributes = True
+
 
 class WorkPackageCreate(BaseModel):
     deal_id: int
     packages: List[PackageBase]
+
+    class Config:
+        from_attributes = True
