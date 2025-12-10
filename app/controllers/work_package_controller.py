@@ -71,8 +71,8 @@ def create_or_update_work_packages(
         validate_dependencies_ids(pkg.dependencies_ids, db)
 
         # UPDATE
-        if pkg.package_id:
-            wp = db.query(WorkPackage).filter(WorkPackage.id == pkg.package_id).first()
+        if pkg.id:
+            wp = db.query(WorkPackage).filter(WorkPackage.id == pkg.id).first()
 
             if not wp:
                 raise HTTPException(status_code=404, detail="Package not found")

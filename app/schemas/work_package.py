@@ -25,7 +25,7 @@ class ToolsOut(BaseClass):
 
 
 class PackageBase(BaseModel):
-    package_id: Optional[int] = None
+    id: Optional[int] = None
     package_title: str
     package_type_id: int
     package_summary: str
