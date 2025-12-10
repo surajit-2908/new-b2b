@@ -5,6 +5,7 @@ from app.models.package_type import PackageType
 from app.models.skill import Skill
 from app.models.tool import Tool
 from app.models.work_package import WorkPackage
+from app.schemas.message_response import MessageResponse
 from app.schemas.work_package import (
     PackageTypeOut,
     SkillsOut,
@@ -49,7 +50,7 @@ def create_or_update_work_packages(
     """
     Create or update work for a deal.
     """
-    
+
     # Validate deal
     deal = db.query(Deal).filter(Deal.id == data.deal_id).first()
     if not deal:
@@ -156,7 +157,9 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
         raise HTTPException(status_code=400, detail="dependencies id is required")
 
     # Get existing skill IDs from DB
-    existing_ids = db.query(PackageType.id).filter(PackageType.id.in_(dependencies_ids)).all()
+    existing_ids = (
+        db.query(PackageType.id).filter(PackageType.id.in_(dependencies_ids)).all()
+    )
 
     existing_ids = [t[0] for t in existing_ids]
 
@@ -167,3 +170,34 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
         raise HTTPException(status_code=400, detail="Invalid dependencies ids")
 
     return True
+
+
+@router.get("/{deal_id}", response_model=WorkPackageCreate | MessageResponse)
+def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve work packages by deal ID."""
+    packages = db.query(WorkPackage).filter(WorkPackage.deal_id == deal_id).all()
+
+    if not packages:
+        return {"message": "No work packages found for this deal"}
+
+    return WorkPackageCreate(deal_id=deal_id, packages=packages)
+
+
+@router.delete(
+    "/{package_id}",
+    response_model=MessageResponse,
+    dependencies=[Depends(role_required(["Admin", "User"]))],
+)
+def delete_work_packages(package_id: int, db: Session = Depends(get_db)):
+    """
+    Delete work packages by package Id."""
+    package = db.query(WorkPackage).filter(WorkPackage.id == package_id).first()
+
+    if not package:
+        raise HTTPException(status_code=404, detail="Work package not found")
+
+    db.delete(package)
+    db.commit()
+
+    return {"message": "work package successfully deleted"}
