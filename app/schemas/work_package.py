@@ -1,7 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
-from decimal import Decimal
 
 
 class BaseClass(BaseModel):
@@ -36,7 +35,7 @@ class PackageBase(BaseModel):
     required_skills_ids: List[int]
     primary_tools_ids: List[int]
     package_estimated_complexity: str
-    package_price_allocation: Optional[Decimal] = None
+    package_price_allocation: Optional[float] = None
     dependencies_ids: List[int]
 
     class Config:
@@ -62,7 +61,7 @@ class PackageBaseOut(BaseModel):
     required_skills: List[SkillsOut]
     primary_tools: List[ToolsOut]
     package_estimated_complexity: str
-    package_price_allocation: Optional[Decimal] = None
+    package_price_allocation: Optional[float] = None
     dependencies: List[BaseClass]
 
     class Config:
