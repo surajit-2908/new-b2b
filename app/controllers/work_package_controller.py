@@ -26,7 +26,7 @@ def get_package_types(db: Session = Depends(get_db)):
 
     return packages
 
-
+ 
 @router.get("/get-skills", response_model=list[SkillsOut])
 def get_skills(db: Session = Depends(get_db)):
     skills = db.query(Skill).all()
