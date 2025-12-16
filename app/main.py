@@ -45,4 +45,4 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 @app.on_event("startup")
 def on_startup():
     print("Creating tables...")
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
