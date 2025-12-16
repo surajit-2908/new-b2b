@@ -1,4 +1,4 @@
-from app.schemas.message_response import MessageResponse
+from app.schemas.message_response import DataResponse, MessageResponse
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.deal import Deal
 from app.schemas.technical_context import TechnicalContextCreate, TechnicalContextOut
@@ -58,7 +58,7 @@ def create_or_update_technical_context(data: TechnicalContextCreate, db: Session
         return {"message": "Technical context saved successfully"}
 
 
-@router.get("/{deal_id}", response_model=TechnicalContextOut | MessageResponse)
+@router.get("/{deal_id}", response_model=DataResponse[TechnicalContextOut] | MessageResponse)
 def get_technical_context_by_deal(deal_id: int, db: Session = Depends(get_db)):
     """
     Retrieve Technical Context by deal ID."""
@@ -66,5 +66,5 @@ def get_technical_context_by_deal(deal_id: int, db: Session = Depends(get_db)):
     if not technical_context:
         return {"message": "No technical context found for this deal"}
 
-    return technical_context
+    return {"data": technical_context}
     

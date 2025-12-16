@@ -1,4 +1,4 @@
-from app.schemas.message_response import MessageResponse
+from app.schemas.message_response import DataResponse, MessageResponse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -30,7 +30,7 @@ def list_sector_packages(db: Session = Depends(get_db)):
     return packages_sorted
 
 
-@router.get("/{lead_id}", response_model=DealOut | MessageResponse)
+@router.get("/{lead_id}", response_model=DataResponse[DealOut] | MessageResponse)
 def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
     """
     Retrieve deal information by lead ID."""
@@ -38,7 +38,7 @@ def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
     if not deal:
         return {"message": "No deal found for this lead"}
 
-    return deal
+    return {"data": deal}
 
 
 @router.post(

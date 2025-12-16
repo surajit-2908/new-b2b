@@ -1,6 +1,6 @@
 from app.models.internal_note import InternalNote
 from app.schemas.internal_note import InternalNoteCreate, InternalNoteOut
-from app.schemas.message_response import MessageResponse
+from app.schemas.message_response import DataResponse, MessageResponse
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.deal import Deal
 from sqlalchemy.orm import Session
@@ -55,7 +55,7 @@ def create_or_update_internal_note(data: InternalNoteCreate, db: Session = Depen
         return {"message": "Internal note saved successfully"}
 
 
-@router.get("/{deal_id}", response_model=InternalNoteOut | MessageResponse)
+@router.get("/{deal_id}", response_model=DataResponse[InternalNoteOut] | MessageResponse)
 def get_internal_note_by_deal(deal_id: int, db: Session = Depends(get_db)):
     """
     Retrieve internal note by deal ID."""
@@ -63,5 +63,5 @@ def get_internal_note_by_deal(deal_id: int, db: Session = Depends(get_db)):
     if not internal_note:
         return {"message": "No internal note found for this deal"}
 
-    return internal_note
+    return {"data": internal_note}
     

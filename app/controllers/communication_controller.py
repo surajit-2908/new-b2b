@@ -1,6 +1,6 @@
 from app.models.communication import Communication
 from app.schemas.communication import CommunicationCreate, CommunicationOut
-from app.schemas.message_response import MessageResponse
+from app.schemas.message_response import DataResponse, MessageResponse
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.deal import Deal
 from app.models.technical_context import TechnicalContext
@@ -56,7 +56,7 @@ def create_or_update_communication(data: CommunicationCreate, db: Session = Depe
         return {"message": "Communication saved successfully"}
 
 
-@router.get("/{deal_id}", response_model=CommunicationOut | MessageResponse)
+@router.get("/{deal_id}", response_model=DataResponse[CommunicationOut] | MessageResponse)
 def get_communication_by_deal(deal_id: int, db: Session = Depends(get_db)):
     """
     Retrieve communication by deal ID."""
@@ -64,5 +64,5 @@ def get_communication_by_deal(deal_id: int, db: Session = Depends(get_db)):
     if not communication:
         return {"message": "No communication found for this deal"}
 
-    return communication
+    return {"data": communication}
     
