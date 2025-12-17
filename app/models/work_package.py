@@ -19,6 +19,10 @@ class WorkPackage(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     deal_id = Column(Integer, ForeignKey("deals.id"), nullable=False)
+    
+    assigned_technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    bidding_status = Column(String(20), nullable=True)
+    bidding_duration_days = Column(Integer, nullable=False) # pending,active,closed
 
     package_title = Column(Text, nullable=False)
     package_type_id = Column(Integer, ForeignKey("package_types.id"), nullable=False)
@@ -29,6 +33,7 @@ class WorkPackage(Base):
     acceptance_criteria = Column(Text, nullable=False)
     required_skills_ids = Column(JSON, nullable=False)
     primary_tools_ids = Column(JSON, nullable=False)
+    required_tools_ids = Column(JSON, nullable=False)
 
     package_estimated_complexity = Column(Text, nullable=False)
 
