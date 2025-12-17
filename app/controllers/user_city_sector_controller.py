@@ -205,10 +205,7 @@ def validate_triple_positive(lead: Lead, db: Session):
     existing_internal_note = (
         db.query(InternalNote).filter(InternalNote.deal_id == existing_deal.id).first()
     )
-    print('RESULT:::::::::::::::',existing_deal.id,existing_wp,
-            existing_technical_context,
-            existing_communication,
-            existing_internal_note,)
+    
     if not all(
         [
             existing_wp,
