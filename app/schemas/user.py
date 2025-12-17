@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional
 
 class UserBase(BaseModel):
@@ -19,17 +19,19 @@ class UserOut(BaseModel):
     name: Optional[str] = None
     role: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        allow_population_by_field_name = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        allow_population_by_field_name=True
+    )
         
 class UserResponse(BaseModel):
     message: str
     user: UserOut
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+    
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str

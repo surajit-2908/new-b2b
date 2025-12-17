@@ -1,6 +1,6 @@
 from typing import List
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.user import UserOut
 
@@ -26,13 +26,15 @@ class LeadFreeNoteItem(BaseModel):
     created_by_user: UserOut | None
     updated_by_user: UserOut | None
 
-    model_config = {"from_attributes": True}
-
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 class LeadFreeNoteResponse(BaseModel):
     lead_id: int
     free_notes: List[LeadFreeNoteItem]
     template_notes: List[str] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

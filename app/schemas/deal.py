@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import datetime
 from app.schemas.sector_package import SectorPackageResponse
 
@@ -56,7 +56,8 @@ class DealOut(BaseModel):
     status: str
     draft_version: int | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 

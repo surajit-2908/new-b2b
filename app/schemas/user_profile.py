@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional
 
 class UserProfileResponse(BaseModel):
@@ -11,6 +11,7 @@ class UserProfileResponse(BaseModel):
     discountPercentage: Optional[float]
     invoiceEmail: Optional[EmailStr]
 
-    class Config:
-        from_attributes = True
-        populate_by_name = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True
+    )

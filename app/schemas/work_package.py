@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 from app.schemas.user import UserOut
@@ -10,9 +10,9 @@ class BaseClass(BaseModel):
     name: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 class PackageTypeOut(BaseClass):
     pass
@@ -42,16 +42,18 @@ class PackageBase(BaseModel):
     dependencies_ids: List[int]
     bidding_duration_days: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 class WorkPackageCreate(BaseModel):
     deal_id: int
     packages: List[PackageBase]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 class PackageBaseOut(BaseModel):
@@ -73,8 +75,9 @@ class PackageBaseOut(BaseModel):
     assigned_technician: Optional[UserOut] = None
     
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 
 class WorkPackageOut(BaseModel):
