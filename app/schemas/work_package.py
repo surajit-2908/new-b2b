@@ -2,6 +2,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.schemas.user import UserOut
+
 
 class BaseClass(BaseModel):
     id: int
@@ -34,9 +36,11 @@ class PackageBase(BaseModel):
     acceptance_criteria: str
     required_skills_ids: List[int]
     primary_tools_ids: List[int]
+    required_tools_ids: List[int]
     package_estimated_complexity: str
     package_price_allocation: Optional[float] = None
     dependencies_ids: List[int]
+    bidding_duration_days: int
 
     class Config:
         from_attributes = True
@@ -60,9 +64,14 @@ class PackageBaseOut(BaseModel):
     acceptance_criteria: str
     required_skills: List[SkillsOut]
     primary_tools: List[ToolsOut]
+    required_tools: List[ToolsOut]
     package_estimated_complexity: str
     package_price_allocation: Optional[float] = None
     dependencies: List[BaseClass]
+    bidding_duration_days: int
+    bidding_status: Optional[str] = None
+    assigned_technician: Optional[UserOut] = None
+    
 
     class Config:
         from_attributes = True

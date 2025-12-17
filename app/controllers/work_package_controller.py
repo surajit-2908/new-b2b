@@ -4,6 +4,7 @@ from app.models.deal import Deal
 from app.models.package_type import PackageType
 from app.models.skill import Skill
 from app.models.tool import Tool
+from app.models.user import User
 from app.models.work_package import WorkPackage
 from app.schemas.message_response import MessageResponse
 from app.schemas.work_package import (
@@ -67,8 +68,9 @@ def create_or_update_work_packages(
         if not exists:
             raise HTTPException(status_code=400, detail="Invalid package type id")
 
-        # Validate skills/tools/dependencies
-        validate_tool_ids(pkg.primary_tools_ids, db)
+        # Validate skills/tools/dependencies/required tools ids
+        validate_tool_ids(pkg.primary_tools_ids, db, 'primary_tools_ids')
+        validate_tool_ids(pkg.primary_tools_ids, db,'required_tools_ids')
         validate_skill_ids(pkg.required_skills_ids, db)
         validate_dependencies_ids(pkg.dependencies_ids, db)
 
@@ -87,10 +89,13 @@ def create_or_update_work_packages(
             wp.acceptance_criteria = pkg.acceptance_criteria
             wp.required_skills_ids = pkg.required_skills_ids
             wp.primary_tools_ids = pkg.primary_tools_ids
+            wp.required_tools_ids = pkg.required_tools_ids
             wp.package_estimated_complexity = pkg.package_estimated_complexity
             wp.package_price_allocation = pkg.package_price_allocation
             wp.dependencies_ids = pkg.dependencies_ids
             wp.status = "draft"
+            wp.bidding_status = "pending"
+            wp.bidding_duration_days = pkg.bidding_duration_days
 
         # CREATE
         else:
@@ -104,11 +109,15 @@ def create_or_update_work_packages(
                 acceptance_criteria=pkg.acceptance_criteria,
                 required_skills_ids=pkg.required_skills_ids,
                 primary_tools_ids=pkg.primary_tools_ids,
+                required_tools_ids = pkg.required_tools_ids,
                 package_estimated_complexity=pkg.package_estimated_complexity,
                 package_price_allocation=pkg.package_price_allocation,
                 dependencies_ids=pkg.dependencies_ids,
                 status="draft",
                 draft_version=1,
+                bidding_status="pending",   
+                bidding_duration_days = pkg.bidding_duration_days
+                
             )
 
             db.add(new_wp)
@@ -118,9 +127,12 @@ def create_or_update_work_packages(
     return {"message": "Work packages saved/updated successfully"}
 
 
-def validate_tool_ids(tool_ids: list[int], db: Session):
+def validate_tool_ids(tool_ids: list[int], db: Session, field_name: str):
     if not tool_ids:
-        raise HTTPException(status_code=400, detail="Tools is required")
+        if field_name == 'primary_tools_ids':
+            raise HTTPException(status_code=400, detail="Primary tools is required")
+        else:
+            raise HTTPException(status_code=400, detail="Required tools is required")
 
     # Get existing tool IDs from DB
     existing_ids = db.query(Tool.id).filter(Tool.id.in_(tool_ids)).all()
@@ -203,6 +215,18 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 .filter(Tool.id.in_(pkg.primary_tools_ids))
                 .all()
             )
+            
+        required_tools = []
+         
+        if pkg.required_tools_ids:
+            required_tools = (
+                db.query(Tool)
+                .filter(Tool.id.in_(pkg.primary_tools_ids))
+                .all()
+            )   
+
+        user = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
+
 
        
         dependencies = []
@@ -212,7 +236,7 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 .filter(PackageType.id.in_(pkg.dependencies_ids))
                 .all()
             )
-
+            print(pkg.bidding_duration_days)
         formatted_packages.append(
             PackageBaseOut(
                 id=pkg.id,
@@ -223,10 +247,14 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 key_deliverables=pkg.key_deliverables,
                 acceptance_criteria=pkg.acceptance_criteria,
                 required_skills=skills,    
-                primary_tools=tools,        
+                primary_tools=tools,
+                required_tools=required_tools,        
                 dependencies=dependencies,  
                 package_estimated_complexity=pkg.package_estimated_complexity,
                 package_price_allocation=pkg.package_price_allocation,
+                bidding_duration_days=pkg.bidding_duration_days,
+                bidding_status=pkg.bidding_status,
+                assigned_technician=user  
             )
         )
 
