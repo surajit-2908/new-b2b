@@ -221,7 +221,7 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
         if pkg.required_tools_ids:
             required_tools = (
                 db.query(Tool)
-                .filter(Tool.id.in_(pkg.primary_tools_ids))
+                .filter(Tool.id.in_(pkg.required_tools_ids))
                 .all()
             )   
 
