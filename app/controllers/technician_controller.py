@@ -90,7 +90,7 @@ def get_technician_leads(
 @router.post(
     "/save-bidding",
     response_model=dict,
-    dependencies=[Depends(role_required(["Technician"]))],
+    dependencies=[Depends(role_required(["Technician","Admin"]))],
 )
 def save_bidding_package(
     bidding_data: biddingPackageCreate,
