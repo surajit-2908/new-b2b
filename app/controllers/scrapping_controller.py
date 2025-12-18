@@ -35,8 +35,20 @@ async def get_city_coordinates(city: str) -> tuple[float, float]:
         params = {"address": city, "key": GOOGLE_PLACES_API_KEY}
         res = await client.get(GEOCODE_URL, params=params)
         data = res.json()
-        if not data.get("results"):
-            raise HTTPException(status_code=404, detail=f"City not found: {city}")
+        
+        status = data.get("status")
+
+        if status != "OK":
+            error_msg = data.get("error_message", "Unknown error from Google API")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Geocoding failed: {status} | {error_msg}"
+            )
+        
+        # if not data.get("results"):
+        #     raise HTTPException(status_code=404, detail=f"City not found: {city}")
+        
+        
         loc = data["results"][0]["geometry"]["location"]
         return loc["lat"], loc["lng"]
 
