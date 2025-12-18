@@ -152,6 +152,11 @@ def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db))
     lead.lead_status = status
     db.commit()
     db.refresh(lead)
+    
+    if(status == "Triple Positive"):
+        deal = db.query(Deal).filter(Deal.lead_id == lead.id).first() # already validated in validate_triple_positive
+        db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id).update({"bidding_status": "active"})
+        db.commit()
 
     return {
         "message": "Lead status updated successfully",
@@ -200,7 +205,7 @@ def validate_triple_positive(lead: Lead, db: Session):
     existing_internal_note = (
         db.query(InternalNote).filter(InternalNote.deal_id == existing_deal.id).first()
     )
-
+    
     if not all(
         [
             existing_wp,
@@ -209,6 +214,7 @@ def validate_triple_positive(lead: Lead, db: Session):
             existing_internal_note,
         ]
     ):
+  
         raise HTTPException(
             status_code=400,
             detail="Work Package, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Triple Positive'",
