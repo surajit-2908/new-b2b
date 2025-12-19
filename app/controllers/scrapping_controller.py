@@ -157,7 +157,7 @@ async def fetch_grid_data(client, db, lat, lng, sector, city):
 # -------------------------------------------------------------------
 # 2️⃣ FETCH LEADS (with pagination & filtering)
 # -------------------------------------------------------------------
-@router.get("/", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.get("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def get_leads(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
