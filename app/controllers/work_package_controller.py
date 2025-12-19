@@ -99,7 +99,7 @@ def create_or_update_work_packages(
 
         # CREATE
         else:
-            duplicate_wp = db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id and WorkPackage.package_type_id == pkg.package_type_id ).first()
+            duplicate_wp = db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id,WorkPackage.package_type_id == pkg.package_type_id).first()
             if duplicate_wp:
                 raise HTTPException(status_code=400, detail=f"Package Type already exists for deal {deal.id}")
             
