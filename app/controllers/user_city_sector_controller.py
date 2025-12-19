@@ -19,7 +19,7 @@ from app.utils.pagination import paginate
 router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 
 
-@router.post("/", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.post("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == data.user_id).first()
     if not user:

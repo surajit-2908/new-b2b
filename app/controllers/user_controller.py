@@ -22,7 +22,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # CRUD OPERATIONS
 # ----------------------------------------------------------------------
 
-@router.get("/", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.get("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def get_all_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
