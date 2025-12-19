@@ -57,6 +57,15 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
     )
     if not lead:
         raise HTTPException(404, "Lead not found or not eligible")
+    
+    # Validate sector package
+    sector_package = (
+        db.query(SectorPackage)
+        .filter(SectorPackage.id == data.sector_package_id)
+        .first()
+    )
+    if not sector_package:
+        raise HTTPException(404, "Sector package not found")
 
     # Get “Other (Specify)” ID
     other_pkg = (
