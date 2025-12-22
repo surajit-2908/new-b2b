@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.database import get_db
@@ -27,7 +27,12 @@ def get_all_users(
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    keyword: str = Query(None, description="Search by name or email")
+    keyword: str = Query(None, description="Search by name or email"),
+    role: Optional[str] = Query(
+        None,
+        description="Filter by role",
+        regex="^(Admin|User|Technician)$"
+    )
 ):
     query = db.query(User)
     if keyword:
@@ -35,6 +40,10 @@ def get_all_users(
             User.name.ilike(f"%{keyword}%"),
             User.email.ilike(f"%{keyword}%")
         ))
+        
+    if role:
+        query = query.filter(User.role == role)
+
     query = query.order_by(User.created_at.desc())
     
     users, meta = paginate(query.order_by(User.created_at.desc()), page, limit)
