@@ -175,6 +175,15 @@ def get_bidding_package(
     tools = []
     if work_package.primary_tools_ids:
         tools = db.query(Tool).filter(Tool.id.in_(work_package.primary_tools_ids)).all()
+        
+    required_tools = []
+         
+    if work_package.required_tools_ids:
+            required_tools = (
+                db.query(Tool)
+                .filter(Tool.id.in_(work_package.required_tools_ids))
+                .all()
+            )       
 
     work_package_out = PackageBaseOut(
         id=work_package.id,
@@ -186,9 +195,13 @@ def get_bidding_package(
         acceptance_criteria=work_package.acceptance_criteria,
         required_skills=skills,
         primary_tools=tools,
+        required_tools= required_tools,
         dependencies=dependencies,
         package_estimated_complexity=work_package.package_estimated_complexity,
         package_price_allocation=work_package.package_price_allocation,
+        bidding_duration_days = work_package.bidding_duration_days,
+        bidding_status=work_package.bidding_status,
+        assigned_technician = technician
     )
 
     package = biddingPackageOut(
