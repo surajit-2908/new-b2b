@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Float, ForeignKey, Integer, DateTime, Text, func
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 class BiddingPackage(Base):
@@ -11,3 +12,7 @@ class BiddingPackage(Base):
     note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    work_package = relationship("WorkPackage", lazy="joined")
+    technician = relationship("User", lazy="joined")
