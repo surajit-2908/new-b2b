@@ -111,7 +111,7 @@ def save_bidding_package(
     
     closed_bid_work_package = (
         db.query(WorkPackage)
-        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status )
+        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status == "closed")
         .first()
     )
     
