@@ -73,6 +73,7 @@ class PackageBaseOut(BaseModel):
     bidding_duration_days: int
     bidding_status: Optional[str] = None
     assigned_technician: Optional[UserOut] = None
+    user_bidding_placed: Optional[bool] = None
     
 
     model_config = ConfigDict(

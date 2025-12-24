@@ -1,5 +1,6 @@
-from app.auth import role_required
+from app.auth import get_current_user, role_required
 from app.database import get_db
+from app.models.bidding_package import BiddingPackage
 from app.models.deal import Deal
 from app.models.package_type import PackageType
 from app.models.skill import Skill
@@ -191,7 +192,7 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
 
 
 @router.get("/{deal_id}", response_model=WorkPackageOut | MessageResponse)
-def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
+def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Retrieve work packages by deal ID.
     """
@@ -229,7 +230,18 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 .all()
             )   
 
-        user = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
+        technician = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
+        
+        print(user.id, pkg.id)
+        is_placed_bidding = (
+            db.query(BiddingPackage)
+            .filter(
+                BiddingPackage.work_package_id == pkg.id,
+                BiddingPackage.technician_id == user.id
+            )
+            .first()
+            is not None
+         )
 
 
        
@@ -240,7 +252,7 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 .filter(PackageType.id.in_(pkg.dependencies_ids))
                 .all()
             )
-            print(pkg.bidding_duration_days)
+         
         formatted_packages.append(
             PackageBaseOut(
                 id=pkg.id,
@@ -258,7 +270,8 @@ def get_work_packages_by_deal(deal_id: int, db: Session = Depends(get_db)):
                 package_price_allocation=pkg.package_price_allocation,
                 bidding_duration_days=pkg.bidding_duration_days,
                 bidding_status=pkg.bidding_status,
-                assigned_technician=user  
+                assigned_technician=technician, 
+                user_bidding_placed = is_placed_bidding
             )
         )
 

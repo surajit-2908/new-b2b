@@ -1,20 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import exists
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
+from app.models.deal import Deal
 from app.models.lead import Lead
 from app.models.package_type import PackageType
 from app.models.skill import Skill
 from app.models.tool import Tool
 from app.models.work_package import WorkPackage
 from app.schemas.bidding_package import biddingPackageCreate, biddingPackageOut
+from app.schemas.deal import DealOut
 from app.schemas.lead import LeadOut
 from app.auth import role_required
 
 from app.models.user import User
 from app.models.bidding_package import BiddingPackage
 from app.auth import get_current_user
+from app.schemas.message_response import DataResponse
 from app.schemas.work_package import PackageBaseOut
 from app.utils.pagination import paginate
 
@@ -90,7 +94,7 @@ def get_technician_leads(
 @router.post(
     "/save-bidding",
     response_model=dict,
-    dependencies=[Depends(role_required(["Technician","Admin"]))],
+    dependencies=[Depends(role_required(["Technician", "Admin"]))],
 )
 def save_bidding_package(
     bidding_data: biddingPackageCreate,
@@ -104,6 +108,16 @@ def save_bidding_package(
     )
     if not valid_work_package:
         raise HTTPException(status_code=404, detail="Invalid work package ID.")
+    
+    closed_bid_work_package = (
+        db.query(WorkPackage)
+        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status )
+        .first()
+    )
+    
+    if not closed_bid_work_package:
+        raise HTTPException(status_code=400, detail="Bidding for this work package is closed.")
+    
 
     existing_package = (
         db.query(BiddingPackage)
@@ -175,15 +189,13 @@ def get_bidding_package(
     tools = []
     if work_package.primary_tools_ids:
         tools = db.query(Tool).filter(Tool.id.in_(work_package.primary_tools_ids)).all()
-        
+
     required_tools = []
-         
+
     if work_package.required_tools_ids:
-            required_tools = (
-                db.query(Tool)
-                .filter(Tool.id.in_(work_package.required_tools_ids))
-                .all()
-            )       
+        required_tools = (
+            db.query(Tool).filter(Tool.id.in_(work_package.required_tools_ids)).all()
+        )
 
     work_package_out = PackageBaseOut(
         id=work_package.id,
@@ -195,13 +207,13 @@ def get_bidding_package(
         acceptance_criteria=work_package.acceptance_criteria,
         required_skills=skills,
         primary_tools=tools,
-        required_tools= required_tools,
+        required_tools=required_tools,
         dependencies=dependencies,
         package_estimated_complexity=work_package.package_estimated_complexity,
         package_price_allocation=work_package.package_price_allocation,
-        bidding_duration_days = work_package.bidding_duration_days,
+        bidding_duration_days=work_package.bidding_duration_days,
         bidding_status=work_package.bidding_status,
-        assigned_technician = technician
+        assigned_technician=technician,
     )
 
     package = biddingPackageOut(
@@ -215,3 +227,64 @@ def get_bidding_package(
     )
 
     return package
+
+
+@router.get("/get-deal", response_model=DataResponse[list[DealOut]])
+def get_deal_by_technician(
+    technician_id: int,
+    tab_name: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieve deals associated with the current technician.
+    """
+
+    match tab_name:
+        case "new":
+                deals = (
+        db.query(Deal)
+        .join(WorkPackage, WorkPackage.deal_id == Deal.id)
+        .filter(
+            WorkPackage.bidding_status == "active",
+            ~exists().where(
+                (BiddingPackage.work_package_id == WorkPackage.id) &
+                (BiddingPackage.technician_id == technician_id)
+            )
+        )
+        .distinct()
+        .all()
+    )
+
+        case "open":
+            deals = (
+                db.query(Deal)
+                .join(WorkPackage, WorkPackage.deal_id == Deal.id)
+                .join(BiddingPackage, BiddingPackage.work_package_id == WorkPackage.id)
+                .filter(
+                    BiddingPackage.technician_id == technician_id,
+                    WorkPackage.bidding_status == "active",
+                )
+                .distinct()
+                .all()
+            )
+
+        case "closed":
+            deals = (
+                db.query(Deal)
+                .join(WorkPackage, WorkPackage.deal_id == Deal.id)
+                .join(BiddingPackage, BiddingPackage.work_package_id == WorkPackage.id)
+                .filter(
+                    BiddingPackage.technician_id == technician_id,
+                    WorkPackage.bidding_status == "closed",
+                )
+                .distinct()
+                .all()
+            )
+
+        case _:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid tab_name. Use: new, open, closed",
+            )
+            
+    return {"data": deals}
