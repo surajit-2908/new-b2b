@@ -236,7 +236,6 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
 
         technician = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
         
-        print(user.id, pkg.id)
         is_placed_bidding = (
             db.query(BiddingPackage)
             .filter(
