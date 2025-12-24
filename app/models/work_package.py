@@ -49,3 +49,4 @@ class WorkPackage(Base):
     # Relationship
     deal = relationship("Deal", back_populates="work_package", lazy="joined")
     package_type = relationship("PackageType", back_populates="work_package", lazy="joined")
+    # bidding_packages = relationship("BiddingPackage", back_populates="work_package", cascade="all, delete-orphan")

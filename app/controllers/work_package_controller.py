@@ -15,8 +15,12 @@ from app.schemas.work_package import (
     WorkPackageCreate,
     WorkPackageOut,
 )
+from app.models.bidding_package import BiddingPackage
+from app.schemas.bidding_package import biddingPackageOut
+from app.utils.pagination import paginate
+from typing import List
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 router = APIRouter(prefix="/work-package", tags=["Work Package"])
 
@@ -283,3 +287,59 @@ def delete_work_packages(package_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "work package successfully deleted"}
+
+
+@router.get(
+    "/{work_package_id}/bidding-history",
+    response_model=dict,
+    dependencies=[Depends(role_required(["Admin"]))],
+)
+def get_work_package_bidding_history(
+    work_package_id: int,
+    db: Session = Depends(get_db),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    technician_id: int | None = Query(None, description="Filter by technician"),
+):
+    """
+    Get bidding history of a work package
+    Includes work package + technician details
+    """
+
+    # Validate work package
+    wp_exists = (
+        db.query(WorkPackage.id)
+        .filter(WorkPackage.id == work_package_id)
+        .first()
+    )
+    if not wp_exists:
+        raise HTTPException(status_code=404, detail="Work package not found")
+
+    query = (
+        db.query(BiddingPackage)
+        .filter(BiddingPackage.work_package_id == work_package_id)
+        .order_by(BiddingPackage.created_at.desc())
+    )
+
+    if technician_id:
+        query = query.filter(BiddingPackage.technician_id == technician_id)
+
+    bids, meta = paginate(query, page, limit)
+
+    bids_out: List[biddingPackageOut] = [
+        biddingPackageOut.from_orm(b) for b in bids
+    ]
+
+    return {
+        "data": {
+            "bids": bids_out,
+            "meta": {
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
+                "work_package_id": work_package_id,
+                "technician_id": technician_id,
+            },
+        }
+    }
