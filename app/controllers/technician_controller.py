@@ -115,7 +115,7 @@ def save_bidding_package(
         .first()
     )
     
-    if not closed_bid_work_package:
+    if closed_bid_work_package:
         raise HTTPException(status_code=400, detail="Bidding for this work package is closed.")
     
 
