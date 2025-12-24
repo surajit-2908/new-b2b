@@ -303,18 +303,19 @@ def get_work_package_bidding_history(
 ):
     """
     Get bidding history of a work package
-    Includes work package + technician details
+    Includes FULL work package + technician details
     """
 
-    # Validate work package
-    wp_exists = (
-        db.query(WorkPackage.id)
+    # 1️⃣ Validate work package
+    wp = (
+        db.query(WorkPackage)
         .filter(WorkPackage.id == work_package_id)
         .first()
     )
-    if not wp_exists:
+    if not wp:
         raise HTTPException(status_code=404, detail="Work package not found")
 
+    # 2️⃣ Base bidding query
     query = (
         db.query(BiddingPackage)
         .filter(BiddingPackage.work_package_id == work_package_id)
@@ -324,10 +325,24 @@ def get_work_package_bidding_history(
     if technician_id:
         query = query.filter(BiddingPackage.technician_id == technician_id)
 
+    # 3️⃣ Pagination
     bids, meta = paginate(query, page, limit)
 
+    # 4️⃣ Build FULL work package output ONCE
+    work_package_out = build_work_package_out(wp, db)
+
+    # 5️⃣ Build bidding response
     bids_out: List[biddingPackageOut] = [
-        biddingPackageOut.from_orm(b) for b in bids
+        biddingPackageOut(
+            id=b.id,
+            work_package=work_package_out,
+            technician=b.technician,
+            bidding_amount=b.bidding_amount,
+            note=b.note,
+            created_at=b.created_at,
+            updated_at=b.updated_at,
+        )
+        for b in bids
     ]
 
     return {
@@ -343,3 +358,64 @@ def get_work_package_bidding_history(
             },
         }
     }
+
+
+def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
+    skills = (
+        db.query(Skill)
+        .filter(Skill.id.in_(wp.required_skills_ids))
+        .all()
+        if wp.required_skills_ids
+        else []
+    )
+
+    primary_tools = (
+        db.query(Tool)
+        .filter(Tool.id.in_(wp.primary_tools_ids))
+        .all()
+        if wp.primary_tools_ids
+        else []
+    )
+
+    required_tools = (
+        db.query(Tool)
+        .filter(Tool.id.in_(wp.required_tools_ids))
+        .all()
+        if wp.required_tools_ids
+        else []
+    )
+
+    dependencies = (
+        db.query(PackageType)
+        .filter(PackageType.id.in_(wp.dependencies_ids))
+        .all()
+        if wp.dependencies_ids
+        else []
+    )
+
+    technician = (
+        db.query(User)
+        .filter(User.id == wp.assigned_technician_id)
+        .first()
+        if wp.assigned_technician_id
+        else None
+    )
+
+    return PackageBaseOut(
+        id=wp.id,
+        package_title=wp.package_title,
+        package_type=wp.package_type,
+        package_summary=wp.package_summary,
+        custom_package_type=wp.custom_package_type,
+        key_deliverables=wp.key_deliverables,
+        acceptance_criteria=wp.acceptance_criteria,
+        required_skills=skills,
+        primary_tools=primary_tools,
+        required_tools=required_tools,
+        dependencies=dependencies,
+        package_estimated_complexity=wp.package_estimated_complexity,
+        package_price_allocation=wp.package_price_allocation,
+        bidding_duration_days=wp.bidding_duration_days,
+        bidding_status=wp.bidding_status,
+        assigned_technician=technician,
+    )
