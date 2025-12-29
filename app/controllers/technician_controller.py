@@ -111,7 +111,7 @@ def save_bidding_package(
     
     closed_bid_work_package = (
         db.query(WorkPackage)
-        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status == "closed")
+        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status == "Closed")
         .first()
     )
     
@@ -229,62 +229,130 @@ def get_bidding_package(
     return package
 
 
-@router.get("/get-deal", response_model=DataResponse[list[DealOut]])
-def get_deal_by_technician(
-    technician_id: int,
-    tab_name: str,
+@router.get(
+    "/technician/packages",
+    response_model=dict[str, list[PackageBaseOut]],
+    dependencies=[Depends(role_required(["User"]))],
+)
+def get_packages_for_technician(
+    tab_name: str = Query(..., pattern="^(new|active|awarded|closed)$"),
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Retrieve deals associated with the current technician.
-    """
+    technician_id = user.id
+
+    base_query = db.query(WorkPackage)
 
     match tab_name:
+
+        # 🆕 NEW
+        # Not expired + technician has NOT bid
         case "new":
-                deals = (
-        db.query(Deal)
-        .join(WorkPackage, WorkPackage.deal_id == Deal.id)
-        .filter(
-            WorkPackage.bidding_status == "active",
-            ~exists().where(
-                (BiddingPackage.work_package_id == WorkPackage.id) &
-                (BiddingPackage.technician_id == technician_id)
+            query = (
+                base_query
+                .filter(
+                    WorkPackage.bidding_status == "Active",
+                    ~db.query(BiddingPackage.id)
+                    .filter(
+                        BiddingPackage.work_package_id == WorkPackage.id,
+                        BiddingPackage.technician_id == technician_id,
+                    )
+                    .exists(),
+                )
+            )
+
+        # 🔵 ACTIVE
+        # Technician has bid + not expired
+        case "Active":
+            query = (
+                base_query
+                .join(
+                    BiddingPackage,
+                    BiddingPackage.work_package_id == WorkPackage.id,
+                )
+                .filter(
+                    WorkPackage.bidding_status == "Active",
+                    BiddingPackage.technician_id == technician_id,
+                )
+                .distinct()
+            )
+
+        # 🟢 AWARDED
+        # Assigned to current technician
+        case "awarded":
+            query = base_query.filter(
+                WorkPackage.assigned_technician_id == technician_id
+            )
+
+        # 🔴 CLOSED
+        # Awarded to someone else + technician had bid
+        case "Closed":
+            query = (
+                base_query
+                .join(
+                    BiddingPackage,
+                    BiddingPackage.work_package_id == WorkPackage.id,
+                )
+                .filter(
+                    WorkPackage.bidding_status == "Closed",
+                    BiddingPackage.technician_id == technician_id,
+                    WorkPackage.assigned_technician_id != technician_id,
+                )
+                .distinct()
+            )
+
+    packages = query.order_by(WorkPackage.id.desc()).all()
+
+    formatted_packages: list[PackageBaseOut] = []
+
+    for pkg in packages:
+        # check if technician placed bid
+        is_placed_bidding = (
+            db.query(BiddingPackage)
+            .filter(
+                BiddingPackage.work_package_id == pkg.id,
+                BiddingPackage.technician_id == technician_id,
+            )
+            .first()
+            is not None
+        )
+
+        formatted_packages.append(
+            PackageBaseOut(
+                id=pkg.id,
+                package_title=pkg.package_title,
+                package_type=pkg.package_type,
+                package_summary=pkg.package_summary,
+                custom_package_type=pkg.custom_package_type,
+                key_deliverables=pkg.key_deliverables,
+                acceptance_criteria=pkg.acceptance_criteria,
+                required_skills=db.query(Skill).filter(
+                    Skill.id.in_(pkg.required_skills_ids)
+                ).all() if pkg.required_skills_ids else [],
+                primary_tools=db.query(Tool).filter(
+                    Tool.id.in_(pkg.primary_tools_ids)
+                ).all() if pkg.primary_tools_ids else [],
+                required_tools=db.query(Tool).filter(
+                    Tool.id.in_(pkg.required_tools_ids)
+                ).all() if pkg.required_tools_ids else [],
+                dependencies=db.query(PackageType).filter(
+                    PackageType.id.in_(pkg.dependencies_ids)
+                ).all() if pkg.dependencies_ids else [],
+                package_estimated_complexity=pkg.package_estimated_complexity,
+                package_price_allocation=pkg.package_price_allocation,
+                bidding_duration_days=pkg.bidding_duration_days,
+                bidding_status=pkg.bidding_status,
+                assigned_technician=(
+                    db.query(User)
+                    .filter(User.id == pkg.assigned_technician_id)
+                    .first()
+                    if pkg.assigned_technician_id
+                    else None
+                ),
+                user_bidding_placed=is_placed_bidding,
             )
         )
-        .distinct()
-        .all()
-    )
 
-        case "open":
-            deals = (
-                db.query(Deal)
-                .join(WorkPackage, WorkPackage.deal_id == Deal.id)
-                .join(BiddingPackage, BiddingPackage.work_package_id == WorkPackage.id)
-                .filter(
-                    BiddingPackage.technician_id == technician_id,
-                    WorkPackage.bidding_status == "active",
-                )
-                .distinct()
-                .all()
-            )
-
-        case "closed":
-            deals = (
-                db.query(Deal)
-                .join(WorkPackage, WorkPackage.deal_id == Deal.id)
-                .join(BiddingPackage, BiddingPackage.work_package_id == WorkPackage.id)
-                .filter(
-                    BiddingPackage.technician_id == technician_id,
-                    WorkPackage.bidding_status == "closed",
-                )
-                .distinct()
-                .all()
-            )
-
-        case _:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid tab_name. Use: new, open, closed",
-            )
-            
-    return {"data": deals}
+    return {
+        "data": formatted_packages
+    }

@@ -22,7 +22,7 @@ def auto_assign_lowest_bidder():
             .filter(
                 or_(
                     WorkPackage.bidding_status.is_(None),
-                    WorkPackage.bidding_status != "closed"
+                    WorkPackage.bidding_status != "Closed"
                 ),
                 Lead.triple_positive_timestamp.isnot(None)
             )
@@ -53,7 +53,7 @@ def auto_assign_lowest_bidder():
                 continue
 
             wp.assigned_technician_id = lowest_bid.technician_id
-            wp.bidding_status = "closed"
+            wp.bidding_status = "Closed"
 
             print(
                 f"Assigned technician {lowest_bid.technician_id} "
