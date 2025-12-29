@@ -231,7 +231,7 @@ def get_bidding_package(
 @router.get(
     "/packages",
     response_model=dict[str, list[PackageBaseOut]],
-    dependencies=[Depends(role_required(["User"]))],
+    dependencies=[Depends(role_required(["Technician"]))],
 )
 def get_packages_for_technician(
     tab_name: str = Query(..., pattern="^(new|active|awarded|closed)$"),
