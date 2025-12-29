@@ -84,3 +84,6 @@ class PackageBaseOut(BaseModel):
 class WorkPackageOut(BaseModel):
     deal_id: int
     packages: List[PackageBaseOut]
+
+class TechnicianPackageOut(PackageBaseOut):
+    lead_id: int

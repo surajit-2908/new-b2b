@@ -18,8 +18,7 @@ from app.auth import role_required
 from app.models.user import User
 from app.models.bidding_package import BiddingPackage
 from app.auth import get_current_user
-from app.schemas.message_response import DataResponse
-from app.schemas.work_package import PackageBaseOut
+from app.schemas.work_package import PackageBaseOut, TechnicianPackageOut
 from app.utils.pagination import paginate
 
 router = APIRouter(prefix="/technician", tags=["Technician"])
@@ -241,7 +240,10 @@ def get_packages_for_technician(
 ):
     technician_id = user.id
 
-    base_query = db.query(WorkPackage)
+    base_query = (
+        db.query(WorkPackage, Deal.lead_id)
+        .join(Deal, Deal.id == WorkPackage.deal_id)
+    )
 
     match tab_name:
 
@@ -303,10 +305,10 @@ def get_packages_for_technician(
 
     packages = query.order_by(WorkPackage.id.desc()).all()
 
-    formatted_packages: list[PackageBaseOut] = []
+    formatted_packages: list[TechnicianPackageOut] = []
 
-    for pkg in packages:
-        # check if technician placed bid
+    for pkg, lead_id in packages:
+
         is_placed_bidding = (
             db.query(BiddingPackage)
             .filter(
@@ -318,8 +320,9 @@ def get_packages_for_technician(
         )
 
         formatted_packages.append(
-            PackageBaseOut(
+            TechnicianPackageOut(
                 id=pkg.id,
+                lead_id=lead_id,  # ✅ HERE
                 package_title=pkg.package_title,
                 package_type=pkg.package_type,
                 package_summary=pkg.package_summary,
@@ -353,6 +356,5 @@ def get_packages_for_technician(
             )
         )
 
-    return {
-        "data": formatted_packages
-    }
+    return {"data": formatted_packages}
+
