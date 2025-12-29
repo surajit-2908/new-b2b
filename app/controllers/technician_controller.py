@@ -229,7 +229,7 @@ def get_bidding_package(
 
 
 @router.get(
-    "/technician/packages",
+    "/packages",
     response_model=dict[str, list[PackageBaseOut]],
     dependencies=[Depends(role_required(["User"]))],
 )
