@@ -227,14 +227,16 @@ def get_bidding_package(
 
     return package
 
-
 @router.get(
     "/packages",
-    response_model=dict[str, list[TechnicianPackageOut]],
+    response_model=dict,
     dependencies=[Depends(role_required(["Technician"]))],
 )
 def get_packages_for_technician(
     tab_name: str = Query(..., pattern="^(new|active|awarded|closed)$"),
+    search: str | None = Query(None, description="Search by package title"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -250,17 +252,14 @@ def get_packages_for_technician(
         # 🆕 NEW
         # Not expired + technician has NOT bid
         case "new":
-            query = (
-                base_query
+            query = base_query.filter(
+                WorkPackage.bidding_status == "Active",
+                ~db.query(BiddingPackage.id)
                 .filter(
-                    WorkPackage.bidding_status == "Active",
-                    ~db.query(BiddingPackage.id)
-                    .filter(
-                        BiddingPackage.work_package_id == WorkPackage.id,
-                        BiddingPackage.technician_id == technician_id,
-                    )
-                    .exists(),
+                    BiddingPackage.work_package_id == WorkPackage.id,
+                    BiddingPackage.technician_id == technician_id,
                 )
+                .exists(),
             )
 
         # 🔵 ACTIVE
@@ -303,11 +302,28 @@ def get_packages_for_technician(
                 .distinct()
             )
 
-    packages = query.order_by(WorkPackage.id.desc()).all()
+        case _:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid tab_name. Use new, active, awarded, closed",
+            )
 
-    formatted_packages: list[TechnicianPackageOut] = []
+    # 🔍 SEARCH (package_title)
+    if search:
+        query = query.filter(
+            WorkPackage.package_title.ilike(f"%{search}%")
+        )
 
-    for pkg, lead_id in packages:
+    # 📄 PAGINATION
+    rows, meta = paginate(
+        query.order_by(WorkPackage.id.desc()),
+        page,
+        limit,
+    )
+
+    packages_out: list[TechnicianPackageOut] = []
+
+    for pkg, lead_id in rows:
 
         is_placed_bidding = (
             db.query(BiddingPackage)
@@ -319,10 +335,10 @@ def get_packages_for_technician(
             is not None
         )
 
-        formatted_packages.append(
+        packages_out.append(
             TechnicianPackageOut(
                 id=pkg.id,
-                lead_id=lead_id,  # ✅ HERE
+                lead_id=lead_id,
                 package_title=pkg.package_title,
                 package_type=pkg.package_type,
                 package_summary=pkg.package_summary,
@@ -356,5 +372,16 @@ def get_packages_for_technician(
             )
         )
 
-    return {"data": formatted_packages}
-
+    return {
+        "data": {
+            "packages": packages_out,
+            "meta": {
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
+                "tab_name": tab_name,
+                "search": search,
+            },
+        }
+    }
