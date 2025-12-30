@@ -230,7 +230,7 @@ def get_bidding_package(
 
 @router.get(
     "/packages",
-    response_model=dict[str, list[PackageBaseOut]],
+    response_model=dict[str, list[TechnicianPackageOut]],
     dependencies=[Depends(role_required(["Technician"]))],
 )
 def get_packages_for_technician(
@@ -265,7 +265,7 @@ def get_packages_for_technician(
 
         # 🔵 ACTIVE
         # Technician has bid + not expired
-        case "Active":
+        case "active":
             query = (
                 base_query
                 .join(
@@ -288,7 +288,7 @@ def get_packages_for_technician(
 
         # 🔴 CLOSED
         # Awarded to someone else + technician had bid
-        case "Closed":
+        case "closed":
             query = (
                 base_query
                 .join(
