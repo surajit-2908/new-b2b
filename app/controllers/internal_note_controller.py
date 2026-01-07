@@ -14,7 +14,7 @@ router = APIRouter(prefix="/internal-note", tags=["Internal Note"])
 @router.post(
     "/save",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def create_or_update_internal_note(data: InternalNoteCreate, db: Session = Depends(get_db)):
     """

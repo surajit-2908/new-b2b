@@ -15,7 +15,7 @@ router = APIRouter(prefix="/communication", tags=["Communication"])
 @router.post(
     "/save",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def create_or_update_communication(data: CommunicationCreate, db: Session = Depends(get_db)):
     """

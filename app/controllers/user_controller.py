@@ -74,7 +74,7 @@ def get_user_by_id(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-ALLOWED_ROLES = ["Admin", "User", "Technician"]
+ALLOWED_ROLES = ["Admin", "Sales", "Technician"]
 @router.post("/create", response_model=UserResponse, dependencies=[Depends(role_required(["Admin"]))])
 def create_user(
     user_data: UserCreate,
@@ -185,7 +185,7 @@ def delete_user(
 # PROFILE MANAGEMENT
 # ----------------------------------------------------------------------
 
-@router.get("/me", response_model=UserOut, dependencies=[Depends(role_required(["Admin", "User"]))])
+@router.get("/me", response_model=UserOut, dependencies=[Depends(role_required(["Admin", "Sales"]))])
 def get_my_profile(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
