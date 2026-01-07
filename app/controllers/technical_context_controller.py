@@ -14,7 +14,7 @@ router = APIRouter(prefix="/technical_context", tags=["Technical Context"])
 @router.post(
     "/save",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def create_or_update_technical_context(data: TechnicalContextCreate, db: Session = Depends(get_db)):
     """

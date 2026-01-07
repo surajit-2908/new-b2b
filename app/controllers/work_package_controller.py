@@ -50,7 +50,7 @@ def get_tools(db: Session = Depends(get_db)):
 @router.post(
     "/save",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def create_or_update_work_packages(
     data: WorkPackageCreate, db: Session = Depends(get_db)
@@ -285,7 +285,7 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
 @router.delete(
     "/{package_id}",
     response_model=MessageResponse,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def delete_work_packages(package_id: int, db: Session = Depends(get_db)):
     """

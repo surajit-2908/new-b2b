@@ -51,7 +51,7 @@ def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)
 @router.get(
     "/leads",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def get_user_assigned_leads(
     db: Session = Depends(get_db),
@@ -125,7 +125,7 @@ ALLOWED_STATUSES = [
 @router.put(
     "/lead/{lead_id}/status",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db)):
     if status not in ALLOWED_STATUSES:

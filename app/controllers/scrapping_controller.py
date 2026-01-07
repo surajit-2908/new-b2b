@@ -191,7 +191,7 @@ def get_leads(
         }
     }
     
-@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "User"]))])
+@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
 def list_cities(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by city name")
@@ -205,7 +205,7 @@ def list_cities(
 
     return {"data": {"cities": cities_out, "count": len(cities_out)}}
 
-@router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "User"]))])
+@router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
 def list_sectors(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by sector name"),
@@ -227,7 +227,7 @@ def list_sectors(
         }
     }
 
-@router.get("/{lead_id}", response_model=LeadOut, dependencies=[Depends(role_required(["Admin", "Technician", "User"]))])   
+@router.get("/{lead_id}", response_model=LeadOut, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])   
 def get_lead_by_id(
     lead_id: int,
     db: Session = Depends(get_db)
