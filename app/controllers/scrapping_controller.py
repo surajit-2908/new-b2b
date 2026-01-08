@@ -167,6 +167,18 @@ def get_leads(
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
 ):
+    allowed_statuses = [
+        "Not interested",
+        "Positive lead",
+        "Double Positive",
+        "Triple Positive",
+    ]
+    if status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status. Allowed values are: {', '.join(allowed_statuses)}",
+        )
+        
     query = db.query(Lead)
 
     # Apply filters dynamically
