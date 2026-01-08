@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 from fastapi import APIRouter, Query, HTTPException, Depends
+from typing import Optional
 from sqlalchemy.orm import Session
 from typing import List
 import httpx, os, asyncio
@@ -163,7 +164,8 @@ def get_leads(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
     sector: str | None = Query(None, description="Filter by business sector"),
-    city: str | None = Query(None, description="Filter by city")
+    city: str | None = Query(None, description="Filter by city"),
+    status: str | None = Query(None, description="Filter by status"),
 ):
     query = db.query(Lead)
 
@@ -172,6 +174,8 @@ def get_leads(
         query = query.filter(Lead.sector == sector)
     if city:
         query = query.filter(Lead.city == city)
+    if status:
+        query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
 
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 
