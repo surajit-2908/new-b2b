@@ -63,6 +63,7 @@ def get_user_assigned_leads(
     ),
     sector: Optional[str] = Query(None, description="Filter leads by sector"),
     city: Optional[str] = Query(None, description="Filter leads by city"),
+    status: Optional[str] = Query(None, description="Filter leads by status"),
     page: int = Query(1, ge=1, description="Page number for pagination"),
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
 ):
@@ -94,6 +95,8 @@ def get_user_assigned_leads(
         query = query.filter(Lead.sector.ilike(f"%{sector}%"))
     if city:
         query = query.filter(Lead.city.ilike(f"%{city}%"))
+    if status:
+        query = query.filter(Lead.status.ilike(f"%{status}%"))
 
     # ✅ Pagination logic
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
