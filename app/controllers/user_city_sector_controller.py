@@ -96,7 +96,7 @@ def get_user_assigned_leads(
     if city:
         query = query.filter(Lead.city.ilike(f"%{city}%"))
     if status:
-        query = query.filter(Lead.status.ilike(f"%{status}%"))
+        query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
 
     # ✅ Pagination logic
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
