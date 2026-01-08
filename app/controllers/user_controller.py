@@ -31,7 +31,7 @@ def get_all_users(
     role: Optional[str] = Query(
         None,
         description="Filter by role",
-        regex="^(Admin|User|Technician)$"
+        regex="^(Admin|Sales|Technician)$"
     )
 ):
     query = db.query(User)
