@@ -72,13 +72,7 @@ def get_user_assigned_leads(
     status: Optional[str] = Query(None, description="Filter leads by status"),
     page: int = Query(1, ge=1, description="Page number for pagination"),
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
-):
-    if status not in ALLOWED_STATUSES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
-        )
-        
+):        
     query = db.query(Lead)
 
     # ✅ Filter by user assignments if user_id provided
@@ -108,6 +102,11 @@ def get_user_assigned_leads(
     if city:
         query = query.filter(Lead.city.ilike(f"%{city}%"))
     if status:
+        if status not in ALLOWED_STATUSES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
+            )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
 
     # ✅ Pagination logic

@@ -167,18 +167,6 @@ def get_leads(
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
 ):
-    allowed_statuses = [
-        "Not interested",
-        "Positive lead",
-        "Double Positive",
-        "Triple Positive",
-    ]
-    if status not in allowed_statuses:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Allowed values are: {', '.join(allowed_statuses)}",
-        )
-        
     query = db.query(Lead)
 
     # Apply filters dynamically
@@ -187,6 +175,17 @@ def get_leads(
     if city:
         query = query.filter(Lead.city == city)
     if status:
+        allowed_statuses = [
+            "Not interested",
+            "Positive lead",
+            "Double Positive",
+            "Triple Positive",
+        ]
+        if status not in allowed_statuses:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status. Allowed values are: {', '.join(allowed_statuses)}",
+            )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
 
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
