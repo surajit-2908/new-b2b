@@ -19,6 +19,7 @@ from app.utils.pagination import paginate
 router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 
 ALLOWED_STATUSES = [
+    "new",
     "Not interested",
     "Positive lead",
     "Double Positive",

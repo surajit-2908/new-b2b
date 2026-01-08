@@ -176,6 +176,7 @@ def get_leads(
         query = query.filter(Lead.city == city)
     if status:
         allowed_statuses = [
+            "new",
             "Not interested",
             "Positive lead",
             "Double Positive",
