@@ -86,5 +86,32 @@ class WorkPackageOut(BaseModel):
     deal_id: int
     packages: List[PackageBaseOut]
 
-class TechnicianPackageOut(PackageBaseOut):
+class TechnicianPackageOut(BaseModel):
+    id: Optional[int] = None
+    package_title: str
+    package_type: PackageTypeOut
+    package_price_allocation: Optional[float] = None
+    bidding_duration_days: int
+    package_estimated_complexity: str
+    required_skills: List[SkillsOut]
+    lowest_bid: Optional[float] = None
     lead_id: int
+      
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+    
+class AdminPackageOut(BaseModel):
+    id: Optional[int] = None
+    package_title: str
+    package_type: PackageTypeOut
+    package_price_allocation: Optional[float] = None
+    bidding_duration_days: int
+    package_estimated_complexity: str
+    required_skills: List[SkillsOut]
+    lowest_bid: Optional[float] = None
+    lead_id: int
+      
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

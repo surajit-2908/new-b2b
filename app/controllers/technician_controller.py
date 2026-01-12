@@ -356,34 +356,12 @@ def get_packages_for_technician(
                 lead_id=lead_id,
                 package_title=pkg.package_title,
                 package_type=pkg.package_type,
-                package_summary=pkg.package_summary,
-                custom_package_type=pkg.custom_package_type,
-                key_deliverables=pkg.key_deliverables,
-                acceptance_criteria=pkg.acceptance_criteria,
+                package_price_allocation=pkg.package_price_allocation,
+                bidding_duration_days=pkg.bidding_duration_days,
+                package_estimated_complexity=pkg.package_estimated_complexity,
                 required_skills=db.query(Skill).filter(
                     Skill.id.in_(pkg.required_skills_ids)
                 ).all() if pkg.required_skills_ids else [],
-                primary_tools=db.query(Tool).filter(
-                    Tool.id.in_(pkg.primary_tools_ids)
-                ).all() if pkg.primary_tools_ids else [],
-                required_tools=db.query(Tool).filter(
-                    Tool.id.in_(pkg.required_tools_ids)
-                ).all() if pkg.required_tools_ids else [],
-                dependencies=db.query(PackageType).filter(
-                    PackageType.id.in_(pkg.dependencies_ids)
-                ).all() if pkg.dependencies_ids else [],
-                package_estimated_complexity=pkg.package_estimated_complexity,
-                package_price_allocation=pkg.package_price_allocation,
-                bidding_duration_days=pkg.bidding_duration_days,
-                bidding_status=pkg.bidding_status,
-                assigned_technician=(
-                    db.query(User)
-                    .filter(User.id == pkg.assigned_technician_id)
-                    .first()
-                    if pkg.assigned_technician_id
-                    else None
-                ),
-                user_bidding_placed=is_placed_bidding,
                 lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
             )
         )
