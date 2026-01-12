@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.work_package import WorkPackage
 from app.schemas.message_response import MessageResponse
 from app.schemas.work_package import (
+    AdminPackageOut,
     PackageBaseOut,
     PackageTypeOut,
     SkillsOut,
@@ -448,3 +449,117 @@ def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
         assigned_technician=technician,
         lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
     )
+
+
+@router.get(
+    "/admin/packages",
+    response_model=dict,
+    dependencies=[Depends(role_required(["Admin"]))],
+)
+def get_packages_for_admin(
+    tab_name: str = Query(..., pattern="^(active|closed)$"),
+    search: str | None = Query(None, description="Search by package title"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    
+
+    base_query = (
+        db.query(WorkPackage, Deal.lead_id)
+        .join(Deal, Deal.id == WorkPackage.deal_id)
+    )
+
+    match tab_name:
+
+        # 🔵 ACTIVE
+        # New + Technician has bid + not expired
+        case "active":
+            query = (
+                base_query
+                .join(
+                    BiddingPackage,
+                    BiddingPackage.work_package_id == WorkPackage.id,
+                )
+                .filter(
+                    WorkPackage.bidding_status == "Active",
+                )
+                .distinct()
+            )
+
+
+        # 🔴 CLOSED
+        # Awarded to someone else + technician had bid
+        case "closed":
+            query = (
+                base_query
+                .join(
+                    BiddingPackage,
+                    BiddingPackage.work_package_id == WorkPackage.id,
+                )
+                .filter(
+                    WorkPackage.bidding_status == "Closed",
+                )
+                .distinct()
+            )
+
+        case _:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid tab_name. Use active, closed",
+            )
+
+    # 🔍 SEARCH (package_title)
+    if search:
+        query = query.filter(
+            WorkPackage.package_title.ilike(f"%{search}%")
+        )
+
+    # 📄 PAGINATION
+    rows, meta = paginate(
+        query.order_by(WorkPackage.id.desc()),
+        page,
+        limit,
+    )
+
+    packages_out: list[AdminPackageOut] = []
+
+    for pkg, lead_id in rows:
+           
+        lowest_bid = (
+            db.query(BiddingPackage)    
+            .filter(BiddingPackage.work_package_id == pkg.id)
+            .order_by(BiddingPackage.bidding_amount.asc())
+            .first()
+        ) 
+
+        packages_out.append(
+            AdminPackageOut(
+                id=pkg.id,
+                lead_id=lead_id,
+                package_title=pkg.package_title,
+                package_type=pkg.package_type,
+                package_price_allocation=pkg.package_price_allocation,
+                bidding_duration_days=pkg.bidding_duration_days,
+                package_estimated_complexity=pkg.package_estimated_complexity,
+                required_skills=db.query(Skill).filter(
+                    Skill.id.in_(pkg.required_skills_ids)
+                ).all() if pkg.required_skills_ids else [],
+                lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
+            )
+        )
+
+    return {
+        "data": {
+            "packages": packages_out,
+            "meta": {
+                "total": meta["total"],
+                "page": meta["page"],
+                "limit": meta["limit"],
+                "pages": meta["pages"],
+                "tab_name": tab_name,
+                "search": search,
+            },
+        }
+    }
