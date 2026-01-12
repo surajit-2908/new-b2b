@@ -195,6 +195,13 @@ def get_bidding_package(
         required_tools = (
             db.query(Tool).filter(Tool.id.in_(work_package.required_tools_ids)).all()
         )
+        
+    lowest_bid = (
+            db.query(BiddingPackage)    
+            .filter(BiddingPackage.work_package_id == work_package.id)
+            .order_by(BiddingPackage.bidding_amount.asc())
+            .first()
+        ) 
 
     work_package_out = PackageBaseOut(
         id=work_package.id,
@@ -213,6 +220,7 @@ def get_bidding_package(
         bidding_duration_days=work_package.bidding_duration_days,
         bidding_status=work_package.bidding_status,
         assigned_technician=technician,
+        lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
     )
 
     package = biddingPackageOut(

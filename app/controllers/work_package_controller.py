@@ -255,7 +255,14 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
                 .filter(PackageType.id.in_(pkg.dependencies_ids))
                 .all()
             )
-         
+            
+        lowest_bid = (
+            db.query(BiddingPackage)    
+            .filter(BiddingPackage.work_package_id == pkg.id)
+            .order_by(BiddingPackage.bidding_amount.asc())
+            .first()
+        )
+
         formatted_packages.append(
             PackageBaseOut(
                 id=pkg.id,
@@ -274,7 +281,9 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
                 bidding_duration_days=pkg.bidding_duration_days,
                 bidding_status=pkg.bidding_status,
                 assigned_technician=technician, 
-                user_bidding_placed = is_placed_bidding
+                user_bidding_placed = is_placed_bidding,
+                lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
+            
             )
         )
 
@@ -412,6 +421,13 @@ def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
         if wp.assigned_technician_id
         else None
     )
+    
+    lowest_bid = (
+            db.query(BiddingPackage)    
+            .filter(BiddingPackage.work_package_id == wp.id)
+            .order_by(BiddingPackage.bidding_amount.asc())
+            .first()
+        )
 
     return PackageBaseOut(
         id=wp.id,
@@ -430,4 +446,5 @@ def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
         bidding_duration_days=wp.bidding_duration_days,
         bidding_status=wp.bidding_status,
         assigned_technician=technician,
+        lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
     )
