@@ -342,6 +342,13 @@ def get_packages_for_technician(
             .first()
             is not None
         )
+        
+        lowest_bid = (
+            db.query(BiddingPackage)    
+            .filter(BiddingPackage.work_package_id == pkg.id)
+            .order_by(BiddingPackage.bidding_amount.asc())
+            .first()
+        ) 
 
         packages_out.append(
             TechnicianPackageOut(
@@ -377,6 +384,7 @@ def get_packages_for_technician(
                     else None
                 ),
                 user_bidding_placed=is_placed_bidding,
+                lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
             )
         )
 
