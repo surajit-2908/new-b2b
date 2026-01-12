@@ -23,6 +23,11 @@ from app.utils.pagination import paginate
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, Query
+from app.utils.db_helpers import (
+    fetch_skills,
+    fetch_tools,
+    fetch_dependencies,
+)
 
 router = APIRouter(prefix="/work-package", tags=["Work Package"])
 
@@ -210,30 +215,10 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
 
     for pkg in packages:
         
-        skills = []
-        if pkg.required_skills_ids:
-            skills = (
-                db.query(Skill)
-                .filter(Skill.id.in_(pkg.required_skills_ids))
-                .all()
-            )
-
-        tools = []
-        if pkg.primary_tools_ids:
-            tools = (
-                db.query(Tool)
-                .filter(Tool.id.in_(pkg.primary_tools_ids))
-                .all()
-            )
-            
-        required_tools = []
-         
-        if pkg.required_tools_ids:
-            required_tools = (
-                db.query(Tool)
-                .filter(Tool.id.in_(pkg.required_tools_ids))
-                .all()
-            )   
+        skills = fetch_skills(db, pkg.required_skills_ids)
+        tools = fetch_tools(db, pkg.primary_tools_ids)
+        required_tools = fetch_tools(db, pkg.required_tools_ids) 
+        dependencies = fetch_dependencies(db, pkg.dependencies_ids)
 
         technician = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
         
@@ -246,16 +231,6 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
             .first()
             is not None
          )
-
-
-       
-        dependencies = []
-        if pkg.dependencies_ids:
-            dependencies = (
-                db.query(PackageType)
-                .filter(PackageType.id.in_(pkg.dependencies_ids))
-                .all()
-            )
             
         lowest_bid = (
             db.query(BiddingPackage)    
@@ -383,37 +358,10 @@ def get_work_package_bidding_history(
 
 
 def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
-    skills = (
-        db.query(Skill)
-        .filter(Skill.id.in_(wp.required_skills_ids))
-        .all()
-        if wp.required_skills_ids
-        else []
-    )
-
-    primary_tools = (
-        db.query(Tool)
-        .filter(Tool.id.in_(wp.primary_tools_ids))
-        .all()
-        if wp.primary_tools_ids
-        else []
-    )
-
-    required_tools = (
-        db.query(Tool)
-        .filter(Tool.id.in_(wp.required_tools_ids))
-        .all()
-        if wp.required_tools_ids
-        else []
-    )
-
-    dependencies = (
-        db.query(PackageType)
-        .filter(PackageType.id.in_(wp.dependencies_ids))
-        .all()
-        if wp.dependencies_ids
-        else []
-    )
+    skills = fetch_skills(db, wp.required_skills_ids)
+    primary_tools = fetch_tools(db, wp.primary_tools_ids)
+    required_tools = fetch_tools(db, wp.required_tools_ids)
+    dependencies = fetch_dependencies(db, wp.dependencies_ids)
 
     technician = (
         db.query(User)

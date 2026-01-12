@@ -20,6 +20,11 @@ from app.models.bidding_package import BiddingPackage
 from app.auth import get_current_user
 from app.schemas.work_package import PackageBaseOut, TechnicianPackageOut
 from app.utils.pagination import paginate
+from app.utils.db_helpers import (
+    fetch_skills,
+    fetch_tools,
+    fetch_dependencies,
+)
 
 router = APIRouter(prefix="/technician", tags=["Technician"])
 
@@ -171,30 +176,10 @@ def get_bidding_package(
         .first()
     )
 
-    dependencies = []
-    if work_package.dependencies_ids:
-        dependencies = (
-            db.query(PackageType)
-            .filter(PackageType.id.in_(work_package.dependencies_ids))
-            .all()
-        )
-
-    skills = []
-    if work_package.required_skills_ids:
-        skills = (
-            db.query(Skill).filter(Skill.id.in_(work_package.required_skills_ids)).all()
-        )
-
-    tools = []
-    if work_package.primary_tools_ids:
-        tools = db.query(Tool).filter(Tool.id.in_(work_package.primary_tools_ids)).all()
-
-    required_tools = []
-
-    if work_package.required_tools_ids:
-        required_tools = (
-            db.query(Tool).filter(Tool.id.in_(work_package.required_tools_ids)).all()
-        )
+    skills = fetch_skills(db, work_package.required_skills_ids)
+    tools = fetch_tools(db, work_package.primary_tools_ids)
+    required_tools = fetch_tools(db, work_package.required_tools_ids)
+    dependencies = fetch_dependencies(db, work_package.dependencies_ids)
         
     lowest_bid = (
             db.query(BiddingPackage)    
