@@ -333,15 +333,15 @@ def get_packages_for_technician(
 
     for pkg, lead_id in rows:
 
-        is_placed_bidding = (
-            db.query(BiddingPackage)
-            .filter(
-                BiddingPackage.work_package_id == pkg.id,
-                BiddingPackage.technician_id == technician_id,
-            )
-            .first()
-            is not None
-        )
+        # is_placed_bidding = (
+        #     db.query(BiddingPackage)
+        #     .filter(
+        #         BiddingPackage.work_package_id == pkg.id,
+        #         BiddingPackage.technician_id == technician_id,
+        #     )
+        #     .first()
+        #     is not None
+        # )
         
         lowest_bid = (
             db.query(BiddingPackage)    
