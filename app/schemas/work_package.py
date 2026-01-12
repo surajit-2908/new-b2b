@@ -74,6 +74,7 @@ class PackageBaseOut(BaseModel):
     bidding_status: Optional[str] = None
     assigned_technician: Optional[UserOut] = None
     user_bidding_placed: Optional[bool] = None
+    lowest_bid: Optional[float] = None
     
 
     model_config = ConfigDict(
