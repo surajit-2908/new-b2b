@@ -178,9 +178,9 @@ def get_leads(
         allowed_statuses = [
             "new",
             "Not interested",
-            "Positive lead",
-            "Double Positive",
-            "Triple Positive",
+            "Qualified Lead",
+            "Active Lead",
+            "Fulfillment Stage",
         ]
         if status not in allowed_statuses:
             raise HTTPException(
