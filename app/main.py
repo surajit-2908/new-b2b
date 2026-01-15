@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from app.database import engine, Base
+from app.scheduler.bidding_scheduler import auto_assign_lowest_bidder
 from app.controllers import (
     auth_controller,
     communication_controller,
@@ -16,9 +17,6 @@ from app.controllers import (
     technician_controller,
     work_package_controller,
 )
-
-from app.database import engine, Base
-from app.scheduler.bidding_scheduler import auto_assign_lowest_bidder
 
 app = FastAPI()
 
@@ -58,7 +56,7 @@ def on_startup():
     scheduler.add_job(
         auto_assign_lowest_bidder,
         trigger="interval",
-        minutes=1,                   # ⏱️ RUNS HOURLY
+        hours=1,                   # ⏱️ RUNS HOURLY
         id="auto_assign_bidding",
         replace_existing=True,
         max_instances=1,           # safety
