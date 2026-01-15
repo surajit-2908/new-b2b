@@ -44,7 +44,7 @@ def get_deal_by_lead(lead_id: int, db: Session = Depends(get_db)):
 @router.post(
     "/save",
     response_model=dict,
-    dependencies=[Depends(role_required(["Admin", "User"]))],
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
 
