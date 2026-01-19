@@ -201,7 +201,7 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
     return True
 
 
-@router.get("/get_package_estimated_budget_ranges", response_model=list[dict])
+@router.get("/get-package-estimated-budget-ranges", response_model=list[dict])
 def get_package_budget_range():
     return get_package_estimated_budget_ranges()
 
