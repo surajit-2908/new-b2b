@@ -43,11 +43,11 @@ def get_unassigned_triple_positive_leads(
 ):
     """
     List leads where:
-    - lead_status = 'Triple Positive'
+    - lead_status = 'Fulfillment Stage'
     - assigned_technician_id IS NULL
     """
     query = db.query(Lead).filter(
-        Lead.lead_status == "Triple Positive", Lead.assigned_technician_id.is_(None)
+        Lead.lead_status == "Fulfillment Stage", Lead.assigned_technician_id.is_(None)
     )
 
     # Apply filters dynamically

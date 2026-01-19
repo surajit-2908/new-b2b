@@ -21,9 +21,9 @@ router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 ALLOWED_STATUSES = [
     "new",
     "Not interested",
-    "Positive lead",
-    "Double Positive",
-    "Triple Positive",
+    "Qualified Lead",
+    "Active Lead",
+    "Fulfillment Stage",
 ]
 
 @router.post("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
@@ -147,11 +147,11 @@ def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db))
 
     # Update fields
 
-    if status == "Positive lead":
+    if status == "Qualified Lead":
         lead.follow_up_status = "Active"
-    elif status == "Double Positive":
+    elif status == "Active Lead":
         lead = validate_double_positive(lead)
-    elif status == "Triple Positive":
+    elif status == "Fulfillment Stage":
         lead = validate_triple_positive(lead, db)
     else:
         lead.follow_up_status = "Inactive"
@@ -159,8 +159,8 @@ def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db))
     lead.lead_status = status
     db.commit()
     db.refresh(lead)
-    
-    if(status == "Triple Positive"):
+
+    if(status == "Fulfillment Stage"):
         deal = db.query(Deal).filter(Deal.lead_id == lead.id).first() # already validated in validate_triple_positive
         db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id).update({"bidding_status": "active"})
         db.commit()
@@ -174,27 +174,27 @@ def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db))
 
 
 def validate_double_positive(lead: Lead):
-    if lead.lead_status != "Positive lead":
+    if lead.lead_status != "Qualified Lead":
         raise HTTPException(
             status_code=400,
-            detail="Lead must be 'Positive lead' before marking as 'Double Positive'",
+            detail="Lead must be 'Qualified Lead' before marking as 'Active Lead'",
         )
     lead.follow_up_status = "Active"
     return lead
 
 
 def validate_triple_positive(lead: Lead, db: Session):
-    if lead.lead_status != "Double Positive":
+    if lead.lead_status != "Active Lead":
         raise HTTPException(
             status_code=400,
-            detail="Lead must be 'Double Positive' before marking as 'Triple Positive'",
+            detail="Lead must be 'Active Lead' before marking as 'Fulfillment Stage'",
         )
 
     existing_deal = db.query(Deal).filter(Deal.lead_id == lead.id).first()
     if not existing_deal:
         raise HTTPException(
             status_code=400,
-            detail="A deal must be created for this lead before marking as 'Triple Positive'",
+            detail="A deal must be created for this lead before marking as 'Fulfillment Stage'",
         )
     existing_wp = (
         db.query(WorkPackage).filter(WorkPackage.deal_id == existing_deal.id).first()
@@ -224,7 +224,7 @@ def validate_triple_positive(lead: Lead, db: Session):
   
         raise HTTPException(
             status_code=400,
-            detail="Work Package, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Triple Positive'",
+            detail="Work Package, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Fulfillment Stage'",
         )
 
     lead.follow_up_status = "Active"

@@ -13,6 +13,8 @@ from app.models.technical_context import TechnicalContext
 from app.models.communication import Communication
 from app.models.lead_free_note import LeadFreeNote
 from app.models.internal_note import InternalNote
+from app.models.sector_package import SectorPackage
+from app.models.package_type import PackageType
 
 
 # NOTE:
