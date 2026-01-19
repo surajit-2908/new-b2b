@@ -19,6 +19,7 @@ from app.models.user import User
 from app.models.bidding_package import BiddingPackage
 from app.auth import get_current_user
 from app.schemas.work_package import PackageBaseOut, TechnicianPackageOut
+from app.utils.package_estimated_budget import get_package_estimated_budget_ranges
 from app.utils.pagination import paginate
 from app.utils.db_helpers import (
     fetch_skills,
@@ -122,7 +123,29 @@ def save_bidding_package(
     if closed_bid_work_package:
         raise HTTPException(status_code=400, detail="Bidding for this work package is closed.")
     
+    # validate bidding amount against work package budget allocation
+    work_package = (
+    db.query(WorkPackage)
+    .filter(WorkPackage.id == bidding_data.work_package_id)
+    .first()
+)
 
+    budget_ranges = get_package_estimated_budget_ranges()
+
+    budget = next(
+    (r for r in budget_ranges if r["id"] == work_package.package_price_allocation),
+    None,
+    )
+
+    if not budget:
+     raise HTTPException(status_code=400, detail="Invalid budget allocation.")
+
+    if bidding_data.bidding_amount > budget["max"]:
+        raise HTTPException(
+        status_code=400,
+        detail="Bidding amount exceeds the maximum budget allocation.",
+    )
+    
     existing_package = (
         db.query(BiddingPackage)
         .filter(
