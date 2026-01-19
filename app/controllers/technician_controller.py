@@ -106,47 +106,37 @@ def save_bidding_package(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    valid_work_package = (
+    # Validate work package existence    
+    work_package = (
         db.query(WorkPackage)
         .filter(WorkPackage.id == bidding_data.work_package_id)
         .first()
     )
-    if not valid_work_package:
+
+    if not work_package:
         raise HTTPException(status_code=404, detail="Invalid work package ID.")
-    
-    closed_bid_work_package = (
-        db.query(WorkPackage)
-        .filter(WorkPackage.id == bidding_data.work_package_id, WorkPackage.bidding_status == "Closed")
-        .first()
-    )
-    
-    if closed_bid_work_package:
+
+    if work_package.bidding_status == "Closed":
         raise HTTPException(status_code=400, detail="Bidding for this work package is closed.")
-    
-    # validate bidding amount against work package budget allocation
-    work_package = (
-    db.query(WorkPackage)
-    .filter(WorkPackage.id == bidding_data.work_package_id)
-    .first()
-)
 
-    budget_ranges = get_package_estimated_budget_ranges()
-
+    # Validate bidding amount against budget allocation
     budget = next(
-    (r for r in budget_ranges if r["id"] == work_package.package_price_allocation),
-    None,
+        (r for r in get_package_estimated_budget_ranges()
+         if r["id"] == work_package.package_price_allocation),
+        None,
     )
 
     if not budget:
-     raise HTTPException(status_code=400, detail="Invalid budget allocation.")
+        raise HTTPException(status_code=400, detail="Invalid budget allocation.")
 
     if bidding_data.bidding_amount > budget["max"]:
         raise HTTPException(
-        status_code=400,
-        detail="Bidding amount exceeds the maximum budget allocation.",
-    )
-    
-    existing_package = (
+            status_code=400,
+            detail="Bidding amount exceeds the maximum budget allocation.",
+        )
+
+    # Check if technician already bid
+    bidding_package = (
         db.query(BiddingPackage)
         .filter(
             BiddingPackage.work_package_id == bidding_data.work_package_id,
@@ -155,23 +145,24 @@ def save_bidding_package(
         .first()
     )
 
-    if existing_package:
-        existing_package.bidding_amount = bidding_data.bidding_amount
-        existing_package.note = bidding_data.note
-        db.commit()
-        db.refresh(existing_package)
-        return {"message": "Bidding package updated successfully"}
+    if bidding_package:
+        bidding_package.bidding_amount = bidding_data.bidding_amount
+        bidding_package.note = bidding_data.note
+        message = "Bidding package updated successfully"
     else:
-        new_bidding = BiddingPackage(
+        bidding_package = BiddingPackage(
             work_package_id=bidding_data.work_package_id,
             technician_id=current_user.id,
             bidding_amount=bidding_data.bidding_amount,
             note=bidding_data.note,
         )
-        db.add(new_bidding)
-        db.commit()
+        db.add(bidding_package)
+        message = "Bidding package saved successfully"
 
-        return {"message": "Bidding package saved successfully"}
+    db.commit()
+    db.refresh(bidding_package)
+
+    return {"message": message}
 
 
 @router.get("/get-bidding", response_model=biddingPackageOut)
