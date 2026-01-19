@@ -28,7 +28,7 @@ from app.utils.db_helpers import (
     fetch_tools,
     fetch_dependencies,
 )
-
+from app.utils.package_estimated_budget import get_package_estimated_budget_ranges
 router = APIRouter(prefix="/work-package", tags=["Work Package"])
 
 
@@ -199,6 +199,11 @@ def validate_dependencies_ids(dependencies_ids: list[int], db: Session):
         raise HTTPException(status_code=400, detail="Invalid dependencies ids")
 
     return True
+
+
+@router.get("/get_package_estimated_budget_ranges", response_model=list[dict])
+def get_package_budget_range():
+    return get_package_estimated_budget_ranges()
 
 
 @router.get("/{deal_id}", response_model=WorkPackageOut | MessageResponse)
@@ -511,3 +516,4 @@ def get_packages_for_admin(
             },
         }
     }
+
