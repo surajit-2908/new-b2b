@@ -18,6 +18,7 @@ from app.auth import role_required
 from app.models.user import User
 from app.models.bidding_package import BiddingPackage
 from app.auth import get_current_user
+from app.schemas.message_response import MessageResponse
 from app.schemas.work_package import PackageBaseOut, TechnicianPackageOut
 from app.utils.package_estimated_budget import get_package_estimated_budget_ranges
 from app.utils.pagination import paginate
@@ -165,7 +166,7 @@ def save_bidding_package(
     return {"message": message}
 
 
-@router.get("/get-bidding", response_model=biddingPackageOut)
+@router.get("/get-bidding", response_model=biddingPackageOut | MessageResponse)
 def get_bidding_package(
     work_package_id: int,
     technician_id: int,
@@ -181,7 +182,7 @@ def get_bidding_package(
     )
 
     if not bidding_package:
-        raise HTTPException(status_code=404, detail="Bidding package not found.")
+        return {"message": "Bidding package not found."}
 
     technician = db.query(User).filter(User.id == bidding_package.technician_id).first()
     work_package = (
