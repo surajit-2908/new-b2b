@@ -93,6 +93,7 @@ def create_or_update_work_packages(
                 raise HTTPException(status_code=404, detail="Package not found")
 
             wp.package_title = pkg.package_title
+            wp.package_number = pkg.package_number
             wp.package_type_id = pkg.package_type_id
             wp.package_summary = pkg.package_summary
             wp.custom_package_type = pkg.custom_package_type
@@ -117,6 +118,7 @@ def create_or_update_work_packages(
             new_wp = WorkPackage(
                 deal_id=data.deal_id,
                 package_title=pkg.package_title,
+                package_number=pkg.package_number,
                 package_type_id=pkg.package_type_id,
                 package_summary=pkg.package_summary,
                 custom_package_type=pkg.custom_package_type,
@@ -248,6 +250,7 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
             PackageBaseOut(
                 id=pkg.id,
                 package_title=pkg.package_title,
+                package_number=pkg.package_number,
                 package_type=pkg.package_type,   
                 package_summary=pkg.package_summary,
                 custom_package_type=pkg.custom_package_type,
@@ -386,6 +389,7 @@ def build_work_package_out(wp: WorkPackage, db: Session) -> PackageBaseOut:
     return PackageBaseOut(
         id=wp.id,
         package_title=wp.package_title,
+        package_number=wp.package_number,
         package_type=wp.package_type,
         package_summary=wp.package_summary,
         custom_package_type=wp.custom_package_type,
@@ -492,6 +496,7 @@ def get_packages_for_admin(
                 id=pkg.id,
                 lead_id=lead_id,
                 package_title=pkg.package_title,
+                package_number=pkg.package_number,
                 package_type=pkg.package_type,
                 package_price_allocation=pkg.package_price_allocation,
                 bidding_duration_days=pkg.bidding_duration_days,

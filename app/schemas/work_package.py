@@ -28,6 +28,7 @@ class ToolsOut(BaseClass):
 
 class PackageBase(BaseModel):
     id: Optional[int] = None
+    package_number: Optional[str] = None
     package_title: str
     package_type_id: int
     package_summary: str
@@ -58,6 +59,7 @@ class WorkPackageCreate(BaseModel):
 
 class PackageBaseOut(BaseModel):
     id: Optional[int] = None
+    package_number: Optional[str] = None
     package_title: str
     package_type: PackageTypeOut
     package_summary: str
@@ -88,6 +90,7 @@ class WorkPackageOut(BaseModel):
 
 class TechnicianPackageOut(BaseModel):
     id: Optional[int] = None
+    package_number: Optional[str] = None
     package_title: str
     package_type: PackageTypeOut
     package_price_allocation: Optional[float] = None
@@ -103,6 +106,7 @@ class TechnicianPackageOut(BaseModel):
     
 class AdminPackageOut(BaseModel):
     id: Optional[int] = None
+    package_number: Optional[str] = None
     package_title: str
     package_type: PackageTypeOut
     package_price_allocation: Optional[float] = None
