@@ -206,6 +206,7 @@ def get_bidding_package(
     work_package_out = PackageBaseOut(
         id=work_package.id,
         package_title=work_package.package_title,
+        package_number=work_package.package_number,
         package_type=work_package.package_type,
         package_summary=work_package.package_summary,
         custom_package_type=work_package.custom_package_type,
@@ -354,6 +355,7 @@ def get_packages_for_technician(
             TechnicianPackageOut(
                 id=pkg.id,
                 lead_id=lead_id,
+                package_number=pkg.package_number,
                 package_title=pkg.package_title,
                 package_type=pkg.package_type,
                 package_price_allocation=pkg.package_price_allocation,

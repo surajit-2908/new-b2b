@@ -19,7 +19,7 @@ class WorkPackage(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     deal_id = Column(Integer, ForeignKey("deals.id"), nullable=False)
-    
+    package_number = Column(String(50), unique=True, index=True, nullable=False)
     assigned_technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     bidding_status = Column(String(20), nullable=True)
     bidding_duration_days = Column(Integer, nullable=False) # pending,active,closed
