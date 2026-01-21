@@ -119,3 +119,7 @@ class AdminPackageOut(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+class UpdatedPackagesNames(BaseModel):
+    package_number: str
+    package_id: int

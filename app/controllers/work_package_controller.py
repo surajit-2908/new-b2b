@@ -14,6 +14,7 @@ from app.schemas.work_package import (
     PackageTypeOut,
     SkillsOut,
     ToolsOut,
+    UpdatedPackagesNames,
     WorkPackageCreate,
     WorkPackageOut,
 )
@@ -22,7 +23,7 @@ from app.schemas.bidding_package import biddingPackageOut
 from app.utils.pagination import paginate
 from typing import List
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from app.utils.db_helpers import (
     fetch_skills,
     fetch_tools,
@@ -280,15 +281,24 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
     response_model=MessageResponse,
     dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
-def delete_work_packages(package_id: int, db: Session = Depends(get_db)):
+def delete_work_packages(package_id: int,updated_packages_names: list[UpdatedPackagesNames] = Body(...), db: Session = Depends(get_db),
+):
     """
-    Delete work packages by package Id."""
+    Delete work packages by package Id.
+    """
     package = db.query(WorkPackage).filter(WorkPackage.id == package_id).first()
 
     if not package:
         raise HTTPException(status_code=404, detail="Work package not found")
 
     db.delete(package)
+    db.flush()
+
+    for pkg in updated_packages_names:
+        wp = db.query(WorkPackage).filter(WorkPackage.id == pkg.package_id).first()
+        if wp:
+            wp.package_number = pkg.package_number
+
     db.commit()
 
     return {"message": "work package successfully deleted"}
