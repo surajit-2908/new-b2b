@@ -17,7 +17,7 @@ from app.controllers import (
     technician_controller,
     work_package_controller,
 )
-
+ 
 app = FastAPI()
 
 # ---------------- CORS ----------------
