@@ -293,14 +293,18 @@ def delete_work_packages(package_id: int,updated_packages_names: list[UpdatedPac
 
     db.delete(package)
     db.flush()
+    
+    # Bulk fetch all packages to update
+    package_ids = [pkg.package_id for pkg in updated_packages_names]
+    packages = db.query(WorkPackage).filter(WorkPackage.id.in_(package_ids)).all()
+    package_map = {wp.id: wp for wp in packages}
 
     for pkg in updated_packages_names:
-        wp = db.query(WorkPackage).filter(WorkPackage.id == pkg.package_id).first()
+        wp = package_map.get(pkg.package_id)
         if wp:
             wp.package_number = pkg.package_number
 
     db.commit()
-
     return {"message": "work package successfully deleted"}
 
 
