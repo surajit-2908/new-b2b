@@ -53,7 +53,7 @@ async def add_organic_lead(
         email=data.email,
         address=data.address,
         summary=data.summary,
-        lead_status="Qualified Lead",
+        lead_status="Qualified Lead", # Default status for new leads
         lead_type="Organic Lead",
         user_id=current_user.id,
     )
