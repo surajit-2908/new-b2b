@@ -10,6 +10,78 @@ from app.schemas.organic_lead import OrganicLeadCreate, OrganicLeadResponse
 router = APIRouter(prefix="/organic-lead", tags=["Organic Leads"])
 
 
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from app.auth import get_current_user, role_required
+from app.database import get_db
+from app.models.lead import Lead
+from app.models.user import User
+from app.schemas.organic_lead import OrganicLeadResponse
+from app.utils.pagination import paginate
+from app.constants.lead_status import ALLOWED_STATUSES
+
+router = APIRouter(prefix="/organic-lead", tags=["Organic Leads"])
+
+
+@router.get(
+    "/list",
+    response_model=dict,
+    dependencies=[Depends(role_required(["Admin", "Sales"]))],
+)
+def list_organic_leads(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+
+    sector: Optional[str] = Query(None, description="Filter by sector"),
+    city: Optional[str] = Query(None, description="Filter by city"),
+    status: Optional[str] = Query(None, description="Filter by lead status"),
+
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+):
+    query = db.query(Lead).filter(
+        Lead.lead_type == "Organic Lead"
+    )
+
+    # 🔐 ROLE-BASED VISIBILITY
+    if "Sales" in current_user.role and "Admin" not in current_user.role:
+        query = query.filter(Lead.user_id == current_user.id)
+
+    # 🔎 Filters
+    if sector:
+        query = query.filter(Lead.sector.ilike(f"%{sector}%"))
+
+    if city:
+        query = query.filter(Lead.city.ilike(f"%{city}%"))
+
+    if status:
+        if status not in ALLOWED_STATUSES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
+            )
+        query = query.filter(Lead.lead_status == status)
+
+    # 📄 Pagination
+    leads, meta = paginate(
+        query.order_by(Lead.created_at.desc()),
+        page,
+        limit
+    )
+
+    return {
+        "data": [OrganicLeadResponse.from_orm(lead) for lead in leads],
+        "meta": {
+            **meta,
+            "sector": sector,
+            "city": city,
+            "status": status,
+        },
+    }
+
+
 @router.post(
     "/add-organic-lead",
     response_model=dict,

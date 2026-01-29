@@ -26,5 +26,7 @@ class OrganicLeadResponse(BaseModel):
     lead_status: str
     lead_type: str
 
-    class Config:
-        orm_mode = True
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
