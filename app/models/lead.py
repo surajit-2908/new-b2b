@@ -13,7 +13,7 @@ class Lead(Base):
     email = Column(String(255), nullable=True)
     address = Column(String(255), nullable=True)
     summary = Column(String(1024), nullable=True)
-    lead_status = Column(String(50), default="new")
+    lead_status = Column(String(50), default="New")
     follow_up_status = Column(String(50), default="pending")
     assigned_technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     triple_positive_timestamp = Column(DateTime, nullable=True)

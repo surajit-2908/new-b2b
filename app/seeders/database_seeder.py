@@ -6,6 +6,7 @@ from app.seeders.seed_package_types import seed_package_types
 from app.seeders.seed_skills import seed_skills
 from app.seeders.seed_tools import seed_tools
 from app.seeders.seed_lead_status import seed_lead_statuses
+from app.seeders.seed_lead_status_update import seed_lead_statuses
 
 if __name__ == "__main__":
     # seed_admin()

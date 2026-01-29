@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from app.auth import role_required
 from app.utils.pagination import paginate
 from sqlalchemy.orm import joinedload
+from app.constants.lead_status import ALLOWED_STATUSES
 
 load_dotenv()
 router = APIRouter(prefix="/leads", tags=["Leads"])
@@ -175,17 +176,10 @@ def get_leads(
     if city:
         query = query.filter(Lead.city == city)
     if status:
-        allowed_statuses = [
-            "new",
-            "Not interested",
-            "Qualified Lead",
-            "Active Lead",
-            "Fulfillment Stage",
-        ]
-        if status not in allowed_statuses:
+        if status not in ALLOWED_STATUSES:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid status. Allowed values are: {', '.join(allowed_statuses)}",
+                detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
             )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
 

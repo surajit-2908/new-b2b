@@ -15,16 +15,10 @@ from app.models.user import User
 from app.schemas.user_city_sector_schema import UserCitySectorCreate, UserCitySectorOut
 from app.auth import role_required
 from app.utils.pagination import paginate
+from app.constants.lead_status import ALLOWED_STATUSES
 
 router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
 
-ALLOWED_STATUSES = [
-    "new",
-    "Not interested",
-    "Qualified Lead",
-    "Active Lead",
-    "Fulfillment Stage",
-]
 
 @router.post("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)):

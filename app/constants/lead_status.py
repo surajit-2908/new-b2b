@@ -1,6 +1,6 @@
 ALLOWED_STATUSES = [
-    "new",
-    "Not interested",
+    "New",
+    "Not Interested",
     "Qualified Lead",
     "Active Lead",
     "Fulfillment Stage",

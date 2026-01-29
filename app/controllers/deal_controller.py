@@ -52,7 +52,7 @@ def create_or_update_deal(data: DealCreate, db: Session = Depends(get_db)):
     lead = (
         db.query(Lead)
         .filter(Lead.id == data.lead_id)
-        .filter(Lead.lead_status.notin_(["Not interested", "Fulfillment Stage"]))
+        .filter(Lead.lead_status.notin_(["Not Interested", "Fulfillment Stage"]))
         .first()
     )
     if not lead:
