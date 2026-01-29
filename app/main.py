@@ -11,6 +11,7 @@ from app.controllers import (
     internal_note_controller,
     lead_note_controller,
     organic_lead_controller,
+    traffic_lead_controller,
     technical_context_controller,
     user_controller,
     scrapping_controller,
@@ -43,6 +44,7 @@ app.include_router(communication_controller.router)
 app.include_router(internal_note_controller.router)
 app.include_router(work_package_controller.router)
 app.include_router(organic_lead_controller.router)
+app.include_router(traffic_lead_controller.router)
 
 # ---------------- Static ----------------
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
