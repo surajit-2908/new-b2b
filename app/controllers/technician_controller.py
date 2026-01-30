@@ -260,7 +260,7 @@ def get_packages_for_technician(
 
         # 🆕 NEW
         # Not expired + technician has NOT bid
-        case "New":
+        case "new":
             query = base_query.filter(
                 WorkPackage.bidding_status == "Active",
                 ~db.query(BiddingPackage.id)
