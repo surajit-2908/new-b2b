@@ -33,6 +33,7 @@ router = APIRouter(prefix="/organic-lead", tags=["Organic Leads"])
 def list_organic_leads(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    user_id: Optional[int] = Query(None, description="Filter by user ID (Admin only)"),
 
     sector: Optional[str] = Query(None, description="Filter by sector"),
     city: Optional[str] = Query(None, description="Filter by city"),
@@ -44,9 +45,12 @@ def list_organic_leads(
     query = db.query(Lead).filter(
         Lead.lead_type == "Organic Lead"
     )
-
+    
+    # USER-BASED FILTERING ONLY FOR ADMINS
+    if user_id and "Admin" in current_user.role:
+        query = query.filter(Lead.user_id == user_id)
     # 🔐 ROLE-BASED VISIBILITY
-    if "Sales" in current_user.role and "Admin" not in current_user.role:
+    elif "Sales" in current_user.role and "Admin" not in current_user.role:
         query = query.filter(Lead.user_id == current_user.id)
 
     # 🔎 Filters
