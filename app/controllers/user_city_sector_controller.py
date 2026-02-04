@@ -218,7 +218,7 @@ def validate_triple_positive(lead: Lead, db: Session):
   
         raise HTTPException(
             status_code=400,
-            detail="Work Package, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Fulfillment Stage'",
+            detail="Subcontract, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Fulfillment Stage'",
         )
 
     lead.follow_up_status = "Active"

@@ -142,7 +142,7 @@ def create_or_update_work_packages(
 
     db.commit()
 
-    return {"message": "Work packages saved/updated successfully"}
+    return {"message": "Subcontracts saved/updated successfully"}
 
 
 def validate_tool_ids(tool_ids: list[int], db: Session, field_name: str):
@@ -217,7 +217,7 @@ def get_work_packages_by_deal(deal_id: int, user: User = Depends(get_current_use
     packages = db.query(WorkPackage).filter(WorkPackage.deal_id == deal_id).all()
 
     if not packages:
-        return {"message": "No work packages found for this deal"}
+        return {"message": "No subcontracts found for this deal"}
 
     formatted_packages = []
 
@@ -289,7 +289,7 @@ def delete_work_packages(package_id: int,updated_packages_names: list[UpdatedPac
     package = db.query(WorkPackage).filter(WorkPackage.id == package_id).first()
 
     if not package:
-        raise HTTPException(status_code=404, detail="Work package not found")
+        raise HTTPException(status_code=404, detail="Subcontract not found")
 
     db.delete(package)
     db.flush()
@@ -305,7 +305,7 @@ def delete_work_packages(package_id: int,updated_packages_names: list[UpdatedPac
             wp.package_number = pkg.package_number
 
     db.commit()
-    return {"message": "work package successfully deleted"}
+    return {"message": "Subcontract successfully deleted"}
 
 
 @router.get(
@@ -332,7 +332,7 @@ def get_work_package_bidding_history(
         .first()
     )
     if not wp:
-        raise HTTPException(status_code=404, detail="Work package not found")
+        raise HTTPException(status_code=404, detail="Subcontract not found")
 
     # 2️⃣ Base bidding query
     query = (
