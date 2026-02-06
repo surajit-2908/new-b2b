@@ -25,7 +25,7 @@ class Deal(Base):
     custom_sector_package = Column(String(200), nullable=True)
 
     deal_name = Column(Text, nullable=False)
-    salesperson_name = Column(String(150), nullable=False)
+    salesperson_name = Column(String(150), nullable=True)
 
     deal_close_date = Column(DateTime, nullable=True)
     expected_start_date = Column(DateTime, nullable=True)
