@@ -18,7 +18,7 @@ class DealCreate(BaseModel):
     deal_name: str
     salesperson_name: str
 
-    deal_close_date: datetime | None = None
+    deal_close_date: datetime | None = None 
     
     # 1.2 Commercial Terms (Contract Basics)
     expected_start_date: datetime | None = None
