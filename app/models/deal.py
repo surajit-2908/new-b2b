@@ -27,7 +27,7 @@ class Deal(Base):
     deal_name = Column(Text, nullable=False)
     salesperson_name = Column(String(150), nullable=False)
 
-    deal_close_date = Column(DateTime, nullable=False)
+    deal_close_date = Column(DateTime, nullable=True)
     expected_start_date = Column(DateTime, nullable=True)
     expected_end_date_or_deadline = Column(DateTime, nullable=True)
 
