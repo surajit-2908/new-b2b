@@ -1,15 +1,12 @@
-from fastapi import APIRouter, HTTPException
 from datetime import datetime, timezone
-import requests, os
-from dotenv import load_dotenv
+import os, requests
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 
 from app.database import SessionLocal
 from app.models import Lead
 
 load_dotenv()
-
-router = APIRouter(prefix="/traffic-lead", tags=["Traffic Leads"])
 
 TYPEFORM_API_KEY = os.getenv("TYPEFORM_API_KEY")
 FORM_ID = os.getenv("FORM_ID")
@@ -24,9 +21,7 @@ HEADERS = {
 REQUIRED_FIELDS = ["city", "sector", "phone", "email", "address"]
 
 
-# ⚠️ FOR TESTING ONLY
-@router.get("/typeform-responses")
-def get_typeform_responses():
+def sync_typeform_leads():
     db: Session = SessionLocal()
 
     try:
@@ -37,7 +32,7 @@ def get_typeform_responses():
             timeout=10
         )
         if form_res.status_code != 200:
-            raise HTTPException(status_code=500, detail="Failed to fetch form schema")
+            raise Exception("Failed to fetch Typeform schema")
 
         field_map = {
             field["id"]: field["title"]
@@ -51,31 +46,27 @@ def get_typeform_responses():
             timeout=10
         )
         if response.status_code != 200:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail="Failed to fetch Typeform data"
-            )
+            raise Exception("Failed to fetch Typeform responses")
 
         data = response.json()
-
-        table = []
         saved_count = 0
         skipped_count = 0
 
         for item in data.get("items", []):
             response_id = item.get("response_id")
-            submitted_at = item.get("submitted_at")
-
             if not response_id:
                 skipped_count += 1
                 continue
 
-            # Deduplication
+            # 🔒 Deduplication
             exists = (
                 db.query(Lead.id)
                 .filter(Lead.response_id == response_id)
                 .first()
             )
+            if exists:
+                skipped_count += 1
+                continue
 
             # Build answer map
             answers = {}
@@ -83,17 +74,6 @@ def get_typeform_responses():
                 field_id = answer["field"]["id"]
                 field_type = answer["type"]
                 answers[field_map.get(field_id, field_id)] = answer.get(field_type)
-
-            row = {
-                "Response ID": response_id,
-                "Submitted At": submitted_at,
-                **answers
-            }
-            table.append(row)
-
-            if exists:
-                skipped_count += 1
-                continue
 
             # ✅ Required field validation
             if any(not answers.get(field) for field in REQUIRED_FIELDS):
@@ -118,19 +98,15 @@ def get_typeform_responses():
 
         db.commit()
 
-        return {
-            "total": len(table),
-            "saved": saved_count,
-            "skipped": skipped_count,
-            "rows": table
-        }
-
-    except requests.exceptions.Timeout:
-        raise HTTPException(status_code=504, detail="Typeform API timeout")
+        print(
+            f"Typeform sync completed | "
+            f"Saved: {saved_count}, Skipped: {skipped_count}"
+        )
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        print("Typeform sync error:", e)
 
     finally:
+        print("Typeform scheduler executed at:", datetime.now(timezone.utc))
         db.close()

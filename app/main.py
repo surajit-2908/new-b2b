@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import engine, Base
 from app.scheduler.bidding_scheduler import auto_assign_lowest_bidder
+from app.scheduler.traffic_leads import sync_typeform_leads
 from app.controllers import (
     auth_controller,
     communication_controller,
@@ -57,6 +58,7 @@ def on_startup():
     print("Starting application...")
     # Base.metadata.create_all(bind=engine)
 
+    # 1️⃣ Hourly bidding assignment
     scheduler.add_job(
         auto_assign_lowest_bidder,
         trigger="interval",
@@ -65,6 +67,18 @@ def on_startup():
         replace_existing=True,
         max_instances=1,           # safety
         coalesce=True              # skip missed runs
+    )
+    
+    # 2️⃣ Daily Typeform sync
+    scheduler.add_job(
+        sync_typeform_leads,
+        trigger="cron",
+        hour=2,                    # 🕑 runs daily at 02:00 UTC
+        minute=0,
+        id="sync_typeform_leads",
+        replace_existing=True,
+        max_instances=1,
+        coalesce=True
     )
 
     scheduler.start()

@@ -7,6 +7,7 @@ class Lead(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     place_id = Column(String(255), nullable=False, index=True)
+    response_id = Column(String(255), nullable=False, index=True)
     sector = Column(String(255), nullable=False, index=True)
     city = Column(String(255), nullable=False, index=True)
     phone = Column(String(50), nullable=True)
