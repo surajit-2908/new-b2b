@@ -110,6 +110,7 @@ def get_typeform_responses():
                 address=answers.get("address"),
                 summary=answers.get("summary"),
                 lead_type="Traffic Lead",
+                lead_status="Qualified Lead",
                 created_at=datetime.now(timezone.utc)
             )
 
