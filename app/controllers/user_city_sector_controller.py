@@ -67,6 +67,7 @@ def get_user_assigned_leads(
     status: Optional[str] = Query(None, description="Filter leads by status"),
     page: int = Query(1, ge=1, description="Page number for pagination"),
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
+    lead_type: Optional[str] = Query(None, description="Filter by lead type (Traffic Lead/Scrapping Lead)"),
 ):        
     query = db.query(Lead)
 
@@ -103,7 +104,10 @@ def get_user_assigned_leads(
                 detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
             )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
-
+        
+    if lead_type:
+        query = query.filter(Lead.lead_type.ilike(f"%{lead_type}%"))
+        
     # ✅ Pagination logic
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
     serialized_leads = [LeadOut.from_orm(lead) for lead in leads]

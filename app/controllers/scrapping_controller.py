@@ -167,10 +167,12 @@ def get_leads(
     sector: str | None = Query(None, description="Filter by business sector"),
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
-    lead_type: str | None = Query(None, description="Filter by lead type (Traffic Lead/Scrapping Lead)"),
 ):
     query = db.query(Lead)
-
+    
+    # Only return scrapped leads 
+    query = query.filter(Lead.lead_type.ilike("%Scrapping Lead%"))
+    
     # Apply filters dynamically
     if sector:
         query = query.filter(Lead.sector == sector)
@@ -184,8 +186,6 @@ def get_leads(
             )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
         
-    if lead_type:
-        query = query.filter(Lead.lead_type.ilike(f"%{lead_type}%"))    
 
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 
