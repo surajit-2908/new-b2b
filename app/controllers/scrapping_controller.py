@@ -169,7 +169,10 @@ def get_leads(
     status: str | None = Query(None, description="Filter by status"),
 ):
     query = db.query(Lead)
-
+    
+    # Only return scrapped leads 
+    query = query.filter(Lead.lead_type.ilike("%Scrapping Lead%"))
+    
     # Apply filters dynamically
     if sector:
         query = query.filter(Lead.sector == sector)
@@ -182,6 +185,7 @@ def get_leads(
                 detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
             )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
+        
 
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 

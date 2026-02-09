@@ -36,7 +36,7 @@ app.add_middleware(
 app.include_router(auth_controller.router)
 app.include_router(user_controller.router)
 app.include_router(scrapping_controller.router)
-app.include_router(user_city_sector_controller.router)
+app.include_router(user_city_sector_controller.router)  # prefix : /assign-user
 app.include_router(technician_controller.router)
 app.include_router(lead_note_controller.router)
 app.include_router(deal_controller.router)

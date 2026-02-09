@@ -16,9 +16,9 @@ class DealCreate(BaseModel):
     sector_package_id: int
     custom_sector_package: str | None = None
     deal_name: str
-    salesperson_name: str
+    salesperson_name: str | None = None 
 
-    deal_close_date: datetime | None = None
+    deal_close_date: datetime | None = None 
     
     # 1.2 Commercial Terms (Contract Basics)
     expected_start_date: datetime | None = None
