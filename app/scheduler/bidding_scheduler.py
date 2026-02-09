@@ -58,8 +58,9 @@ def auto_assign_lowest_bidder():
                     f"to work_package {wp.id}"
                 )
             else:
-                wp.bidding_status = "Reopen"
-                print(f"No bids. Work_package {wp.id} marked as Reopen")
+                if wp.bidding_status != "Reopen":
+                    wp.bidding_status = "Reopen"
+                    print(f"No bids. Work_package {wp.id} marked as Reopen")
 
         db.commit()
 
