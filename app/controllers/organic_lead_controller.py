@@ -5,6 +5,7 @@ from app.auth import get_current_user, role_required
 from app.database import get_db
 from app.models.lead import Lead
 from app.models.user import User
+from app.models.deal import Deal
 from app.schemas.organic_lead import OrganicLeadCreate, OrganicLeadResponse
 
 router = APIRouter(prefix="/organic-lead", tags=["Organic Leads"])
@@ -42,9 +43,12 @@ def list_organic_leads(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
 ):
-    query = db.query(Lead).filter(
-        Lead.lead_type == "Organic Lead"
-    )
+    query = (
+        db.query(Lead, Deal.deal_close_date)
+        .outerjoin(Deal, Deal.lead_id == Lead.id)
+        ).filter(
+            Lead.lead_type == "Organic Lead"
+        )
     
     # USER-BASED FILTERING ONLY FOR ADMINS
     if user_id and "Admin" in current_user.role:
@@ -74,9 +78,17 @@ def list_organic_leads(
         page,
         limit
     )
+    
+    serialized_leads = [
+        {
+            **OrganicLeadResponse.from_orm(lead).dict(),
+            "deal_close_date": deal_close_date or ""
+        }
+        for lead, deal_close_date in leads
+    ]
 
     return {
-        "data": [OrganicLeadResponse.from_orm(lead) for lead in leads],
+        "data": serialized_leads,
         "meta": {
             **meta,
             "sector": sector,

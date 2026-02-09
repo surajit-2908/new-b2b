@@ -25,6 +25,8 @@ class OrganicLeadResponse(BaseModel):
     summary: Optional[str] = None
     lead_status: str
     lead_type: str
+    created_at: datetime
+    deal_close_date: Optional[str] = ""
 
     
     model_config = ConfigDict(

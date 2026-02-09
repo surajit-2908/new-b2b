@@ -114,9 +114,9 @@ def get_user_assigned_leads(
     # ✅ Pagination logic
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
     serialized_leads = [
-    {**LeadOut.from_orm(lead).dict(), "deal_close_date": deal_close_date or ""}
-    for lead, deal_close_date in leads
-]
+        {**LeadOut.from_orm(lead).dict(), "deal_close_date": deal_close_date or ""}
+        for lead, deal_close_date in leads
+    ]
 
     return {
         "data": serialized_leads,
