@@ -167,7 +167,7 @@ def get_leads(
     sector: str | None = Query(None, description="Filter by business sector"),
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
-    lead_type: str | None = Query(None, description="Filter by lead type"),
+    lead_type: str | None = Query(None, description="Filter by lead type (Traffic Lead/Scrapping Lead)"),
 ):
     query = db.query(Lead)
 
