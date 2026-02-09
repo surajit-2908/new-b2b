@@ -167,6 +167,7 @@ def get_leads(
     sector: str | None = Query(None, description="Filter by business sector"),
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
+    lead_type: str | None = Query(None, description="Filter by lead type"),
 ):
     query = db.query(Lead)
 
@@ -182,6 +183,9 @@ def get_leads(
                 detail=f"Invalid status. Allowed values are: {', '.join(ALLOWED_STATUSES)}",
             )
         query = query.filter(Lead.lead_status.ilike(f"%{status}%"))
+        
+    if lead_type:
+        query = query.filter(Lead.lead_type.ilike(f"%{lead_type}%"))    
 
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
 
