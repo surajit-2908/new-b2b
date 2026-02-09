@@ -20,6 +20,7 @@ class LeadOut(BaseModel):
     triple_positive_timestamp: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+    deal_close_date: Optional[str] = ""
 
     model_config = ConfigDict(
         from_attributes=True,
