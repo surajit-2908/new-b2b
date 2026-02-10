@@ -281,7 +281,7 @@ def get_packages_for_technician(
                     BiddingPackage.work_package_id == WorkPackage.id,
                 )
                 .filter(
-                    WorkPackage.bidding_status == "Active",
+                    WorkPackage.bidding_status.in_(["Active", "Reopen"]),
                     BiddingPackage.technician_id == technician_id,
                 )
                 .distinct()
