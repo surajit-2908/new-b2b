@@ -159,6 +159,7 @@ async def fetch_grid_data(client, db, lat, lng, sector, city):
 # -------------------------------------------------------------------
 # 2️⃣ FETCH LEADS (with pagination & filtering)
 # -------------------------------------------------------------------
+
 @router.get("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def get_leads(
     db: Session = Depends(get_db),
@@ -168,6 +169,7 @@ def get_leads(
     city: str | None = Query(None, description="Filter by city"),
     status: str | None = Query(None, description="Filter by status"),
 ):
+    """Not Using this Endpoint in UI."""
     query = db.query(Lead)
     
     # Only return scrapped leads 

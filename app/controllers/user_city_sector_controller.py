@@ -17,11 +17,13 @@ from app.auth import role_required
 from app.utils.pagination import paginate
 from app.constants.lead_status import ALLOWED_STATUSES
 
-router = APIRouter(prefix="/assign-user", tags=["User Sector Assignment"])
+router = APIRouter(prefix="/sales", tags=["User Sector Assignment"])
 
-
-@router.post("", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.post("/assign-user", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)):
+    """
+    Assign a sector and city to a user.
+    """
     user = db.query(User).filter(User.id == data.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -69,6 +71,9 @@ def get_user_assigned_leads(
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
     lead_type: Optional[str] = Query(None, description="Filter by lead type (Traffic Lead/Scrapping Lead)"),
 ):        
+    """
+    Get leads assigned to a user based on their sector and city assignments, with optional filters for follow-up status, sector, city, lead status, and lead type. Supports pagination.
+    """
     query = (
         db.query(Lead, Deal.deal_close_date)
         .outerjoin(Deal, Deal.lead_id == Lead.id)
@@ -139,6 +144,9 @@ def get_user_assigned_leads(
     dependencies=[Depends(role_required(["Admin", "Sales"]))],
 )
 def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db)):
+    """
+    Update the status of a lead.
+    """
     if status not in ALLOWED_STATUSES:
         raise HTTPException(
             status_code=400,
