@@ -36,7 +36,7 @@ app.add_middleware(
 app.include_router(auth_controller.router)
 app.include_router(user_controller.router)
 app.include_router(scrapping_controller.router)
-app.include_router(user_city_sector_controller.router)  # prefix : /sales
+app.include_router(user_city_sector_controller.router)  # prefix : /assign-user
 app.include_router(technician_controller.router)
 app.include_router(lead_note_controller.router)
 app.include_router(deal_controller.router)
@@ -62,7 +62,7 @@ def on_startup():
     scheduler.add_job(
         auto_assign_lowest_bidder,
         trigger="interval",
-        minute=1,                   # ⏱️ RUNS HOURLY
+        hours=1,                   # ⏱️ RUNS HOURLY
         id="auto_assign_bidding",
         replace_existing=True,
         max_instances=1,           # safety
