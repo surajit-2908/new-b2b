@@ -242,7 +242,7 @@ def get_bidding_package(
     dependencies=[Depends(role_required(["Technician"]))],
 )
 def get_packages_for_technician(
-    tab_name: str = Query(..., pattern="^(new|active|awarded|closed)$"),
+    tab_name: str = Query(..., pattern="^(new|active|awarded|closed|reopen)$"),
     search: str | None = Query(None, description="Search by package title"),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
@@ -263,6 +263,7 @@ def get_packages_for_technician(
         case "new":
             query = base_query.filter(
                 WorkPackage.bidding_status == "Active",
+                WorkPackage.bidding_status == "Reopen",
                 ~db.query(BiddingPackage.id)
                 .filter(
                     BiddingPackage.work_package_id == WorkPackage.id,
