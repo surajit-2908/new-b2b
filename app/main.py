@@ -62,7 +62,7 @@ def on_startup():
     scheduler.add_job(
         auto_assign_lowest_bidder,
         trigger="interval",
-        hours=1,                   # ⏱️ RUNS HOURLY
+        minute=1,                   # ⏱️ RUNS HOURLY
         id="auto_assign_bidding",
         replace_existing=True,
         max_instances=1,           # safety
