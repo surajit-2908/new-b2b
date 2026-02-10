@@ -210,16 +210,18 @@ def get_leads(
 @router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
 def list_cities(
     db: Session = Depends(get_db),
-    keyword: str | None = Query(None, description="Search by city name")
+    keyword: str | None = Query(None, description="Search by city name"),
+    limit: int = Query(20, ge=1, le=100, description="Number of city to return"),
+    page: int = Query(1, ge=1, description="Page number for pagination")
 ):
     query = db.query(City)
     if keyword:
         query = query.filter(City.title.ilike(f"{keyword}%"))
-
-    cities = query.order_by(City.title.asc()).all()
+ 
+    cities, meta = paginate(query.order_by(City.title.asc()), page, limit)
     cities_out: List[CityOut] = [CityOut.from_orm(c) for c in cities]
 
-    return {"data": {"cities": cities_out, "count": len(cities_out)}}
+    return {"data": {"cities": cities_out, "meta": meta}}
 
 @router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
 def list_sectors(
