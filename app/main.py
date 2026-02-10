@@ -72,9 +72,9 @@ def on_startup():
     # 2️⃣ Daily Typeform sync
     scheduler.add_job(
         sync_typeform_leads,
-        trigger="cron",
-        hour=2,                    # 🕑 runs daily at 02:00 UTC
-        minute=0,
+        trigger="interval",
+        minutes=1,                    # 🕑 runs daily at 02:00 UTC
+        # minute=0,
         id="sync_typeform_leads",
         replace_existing=True,
         max_instances=1,
