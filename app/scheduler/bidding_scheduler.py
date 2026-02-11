@@ -30,6 +30,8 @@ def auto_assign_lowest_bidder():
             )
             .all()
         )
+        
+        affected_deal_ids = set()
 
         for wp in work_packages:
             lead = wp.deal.lead
@@ -53,6 +55,8 @@ def auto_assign_lowest_bidder():
                 wp.assigned_technician_id = lowest_bid.technician_id
                 wp.bidding_status = "Closed"
 
+                affected_deal_ids.add(wp.deal_id)
+                
                 print(
                     f"Assigned technician {lowest_bid.technician_id} "
                     f"to work_package {wp.id}"
@@ -62,6 +66,22 @@ def auto_assign_lowest_bidder():
                     wp.bidding_status = "Reopen"
                     print(f"No bids. Work_package {wp.id} marked as Reopen")
 
+        # DEAL AUTO CLOSE LOGIC
+        for deal_id in affected_deal_ids:
+
+            # Check if any work package is still unassigned
+            unassigned_wp = db.query(WorkPackage).filter(
+                WorkPackage.deal_id == deal_id,
+                WorkPackage.assigned_technician_id.is_(None)
+            ).first()
+
+            if not unassigned_wp:
+                deal = db.query(Deal).filter(Deal.id == deal_id).first()
+
+                if deal and deal.deal_close_date is None:
+                    deal.deal_close_date = datetime.now(timezone.utc)
+                    print(f"Deal {deal_id} closed successfully.")
+                    
         db.commit()
 
     except Exception as e:
