@@ -107,7 +107,7 @@ def create_or_update_work_packages(
             wp.package_price_allocation = pkg.package_price_allocation
             wp.dependencies_ids = pkg.dependencies_ids
             wp.status = "draft"
-            wp.bidding_status = "pending"
+            wp.bidding_status = "Pending"
             wp.bidding_duration_days = pkg.bidding_duration_days
 
         # CREATE
@@ -133,7 +133,7 @@ def create_or_update_work_packages(
                 dependencies_ids=pkg.dependencies_ids,
                 status="draft",
                 draft_version=1,
-                bidding_status="pending",   
+                bidding_status="Pending",   
                 bidding_duration_days = pkg.bidding_duration_days
                 
             )

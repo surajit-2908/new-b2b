@@ -174,7 +174,7 @@ def update_lead_status(lead_id: int, status: str, db: Session = Depends(get_db))
 
     if(status == "Fulfillment Stage"):
         deal = db.query(Deal).filter(Deal.lead_id == lead.id).first() # already validated in validate_triple_positive
-        db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id).update({"bidding_status": "active"})
+        db.query(WorkPackage).filter(WorkPackage.deal_id == deal.id).update({"bidding_status": "Active"})
         db.commit()
 
     return {
