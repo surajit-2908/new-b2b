@@ -54,6 +54,11 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ---------------- Scheduler ----------------
 scheduler = BackgroundScheduler(timezone="UTC")
 
+@app.get("/seed-cities")
+def seed_cities():
+    seed_us_cities()
+    return {"message": "Cities seeded successfully"}
+
 @app.on_event("startup")
 def on_startup():
     print("Starting application...")
@@ -86,9 +91,6 @@ def on_startup():
     print("Bidding auto-assignment scheduler started (hourly).")
 
 @app.on_event("shutdown")
-def run_seeders():
-    print("🚀 Running city seeder...")
-    seed_us_cities()
 def on_shutdown():
     scheduler.shutdown()
     print("Scheduler stopped.")
