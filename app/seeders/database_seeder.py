@@ -7,7 +7,7 @@ from app.seeders.seed_skills import seed_skills
 from app.seeders.seed_tools import seed_tools
 from app.seeders.seed_lead_status import seed_lead_statuses
 from app.seeders.seed_lead_status_update import seed_lead_statuses
-from app.seeders.city_seeder import seed_lead_statuses
+from app.seeders.city_seeder import seed_us_cities
 
 if __name__ == "__main__":
     # seed_admin()
@@ -16,4 +16,5 @@ if __name__ == "__main__":
     seed_skills()
     seed_tools()
     seed_lead_statuses()
+    seed_us_cities()
     print("Database seeded successfully!")

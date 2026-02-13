@@ -20,7 +20,8 @@ from app.controllers import (
     technician_controller,
     work_package_controller,
 )
- 
+from app.seeders.city_seeder import seed_us_cities
+
 app = FastAPI()
 
 # ---------------- CORS ----------------
@@ -85,7 +86,9 @@ def on_startup():
     print("Bidding auto-assignment scheduler started (hourly).")
 
 @app.on_event("shutdown")
+def run_seeders():
+    print("🚀 Running city seeder...")
+    seed_us_cities()
 def on_shutdown():
     scheduler.shutdown()
     print("Scheduler stopped.")
- 
