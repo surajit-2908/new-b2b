@@ -1,9 +1,10 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
+from typing import Optional
 
 class TrafficLeadCreate(BaseModel):
-    city: str
     sector: str
-    email: EmailStr
-    phone: str | None = None
-    address: str | None = None
-    summary: str | None = None 
+    city: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    summary: Optional[str] = None
