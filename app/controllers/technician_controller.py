@@ -1,17 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import exists
 from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
 from app.models.deal import Deal
 from app.models.lead import Lead
-from app.models.package_type import PackageType
 from app.models.skill import Skill
-from app.models.tool import Tool
 from app.models.work_package import WorkPackage
 from app.schemas.bidding_package import biddingPackageCreate, biddingPackageOut
-from app.schemas.deal import DealOut
 from app.schemas.lead import LeadOut
 from app.auth import role_required
 
@@ -252,7 +248,7 @@ def get_packages_for_technician(
     technician_id = user.id
 
     base_query = (
-        db.query(WorkPackage, Deal.lead_id)
+        db.query(WorkPackage, Deal.lead_id, Deal.expected_end_date_or_deadline)
         .join(Deal, Deal.id == WorkPackage.deal_id)
     )
 
@@ -332,7 +328,7 @@ def get_packages_for_technician(
 
     packages_out: list[TechnicianPackageOut] = []
 
-    for pkg, lead_id in rows:
+    for pkg, lead_id, expected_end_date_or_deadline in rows:
 
         # is_placed_bidding = (
         #     db.query(BiddingPackage)
@@ -361,6 +357,7 @@ def get_packages_for_technician(
                 package_price_allocation=pkg.package_price_allocation,
                 bidding_duration_days=pkg.bidding_duration_days,
                 package_estimated_complexity=pkg.package_estimated_complexity,
+                expected_end_date_or_deadline=expected_end_date_or_deadline,
                 required_skills=db.query(Skill).filter(
                     Skill.id.in_(pkg.required_skills_ids)
                 ).all() if pkg.required_skills_ids else [],
