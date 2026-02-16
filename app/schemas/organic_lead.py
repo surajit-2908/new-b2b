@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import datetime
 from typing import Optional
 from app.schemas.user import UserOut
@@ -9,7 +9,7 @@ class OrganicLeadCreate(BaseModel):
     sector: str
     city: str
     phone: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     address: Optional[str] = None
     summary: Optional[str] = None
     
