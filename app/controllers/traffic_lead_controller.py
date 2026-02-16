@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
 import requests, os
 from dotenv import load_dotenv
@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.models import Lead
+from app.database import get_db
+from app.schemas.traffic_lead import TrafficLeadCreate
 
 load_dotenv()
 
@@ -135,3 +137,26 @@ def get_typeform_responses():
 
     finally:
         db.close()
+
+
+@router.post("/create", response_model=dict)
+def create_traffic_lead(lead_data: TrafficLeadCreate, db: Session = Depends(get_db)):
+
+    # Create traffic lead
+    lead = Lead(
+        city=lead_data.city,
+        sector=lead_data.sector,
+        phone=lead_data.phone,
+        email=lead_data.email,
+        address=lead_data.address,
+        summary=lead_data.summary,
+        lead_type="Traffic Lead",
+        lead_status="Qualified Lead",
+        created_at=datetime.now(timezone.utc)
+    )
+
+    db.add(lead)
+    db.commit()
+    db.refresh(lead)
+
+    return {"message": "Data saved successfully"}
