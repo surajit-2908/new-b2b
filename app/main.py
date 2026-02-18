@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import engine, Base
 from app.scheduler.bidding_scheduler import auto_assign_lowest_bidder
-from app.scheduler.traffic_leads import sync_typeform_leads
 from app.controllers import (
     auth_controller,
     communication_controller,
@@ -54,10 +53,10 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # ---------------- Scheduler ----------------
 scheduler = BackgroundScheduler(timezone="UTC")
 
-@app.get("/seed-cities")
-def seed_cities():
-    seed_us_cities()
-    return {"message": "Cities seeded successfully"}
+# @app.get("/seed-cities")
+# def seed_cities():
+#     seed_us_cities()
+#     return {"message": "Cities seeded successfully"}
 
 @app.on_event("startup")
 def on_startup():
@@ -76,16 +75,17 @@ def on_startup():
     )
     
     # 2️⃣ Daily Typeform sync
-    scheduler.add_job(
-        sync_typeform_leads,
-        trigger="cron",
-        hour=2,                    # 🕑 runs daily at 02:00 UTC
-        minute=0,
-        id="sync_typeform_leads",
-        replace_existing=True,
-        max_instances=1,
-        coalesce=True
-    )
+    # from app.scheduler.traffic_leads import sync_typeform_leads
+    # scheduler.add_job(
+    #     sync_typeform_leads,
+    #     trigger="cron",
+    #     hour=2,                    # 🕑 runs daily at 02:00 UTC
+    #     minute=0,
+    #     id="sync_typeform_leads",
+    #     replace_existing=True,
+    #     max_instances=1,
+    #     coalesce=True
+    # )
 
     scheduler.start()
     print("Bidding auto-assignment scheduler started (hourly).")

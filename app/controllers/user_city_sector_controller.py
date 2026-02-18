@@ -16,6 +16,7 @@ from app.schemas.user_city_sector_schema import UserCitySectorCreate, UserCitySe
 from app.auth import role_required
 from app.utils.pagination import paginate
 from app.constants.lead_status import ALLOWED_STATUSES
+from app.schemas.user import UserOut
 
 router = APIRouter(prefix="/sales", tags=["User Sector Assignment"])
 
@@ -242,3 +243,40 @@ def validate_triple_positive(lead: Lead, db: Session):
     lead.follow_up_status = "Active"
     lead.triple_positive_timestamp = func.now()
     return lead
+
+@router.get("/lead-user/{lead_id}", response_model=UserOut)
+def get_user_by_lead(lead_id: int, db: Session = Depends(get_db)):
+
+    # 1️⃣ Fetch Lead
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    user = None
+
+    # 2️⃣ Organic Lead → direct user_id
+    if lead.lead_type == "Organic Lead":
+        if not lead.user_id:
+            raise HTTPException(status_code=404, detail="User not assigned to this organic lead")
+
+        user = db.query(User).filter(User.id == lead.user_id).first()
+
+    # 3️⃣ Other Leads → lookup from mapping
+    else:
+        mapping = db.query(UserCitySector).filter(
+            UserCitySector.city == lead.city,
+            UserCitySector.sector == lead.sector
+        ).first()
+
+        if not mapping:
+            raise HTTPException(
+                status_code=404,
+                detail="No user mapping found for this city & sector"
+            )
+
+        user = db.query(User).filter(User.id == mapping.user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user  
