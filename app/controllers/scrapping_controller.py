@@ -207,7 +207,7 @@ def get_leads(
         }
     }
     
-@router.get("/cities", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
+@router.get("/cities", response_model=dict)
 def list_cities(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by city name"),
@@ -223,7 +223,7 @@ def list_cities(
 
     return {"data": {"cities": cities_out, "meta": meta}}
 
-@router.get("/sectors", response_model=dict, dependencies=[Depends(role_required(["Admin", "Technician", "Sales"]))])
+@router.get("/sectors", response_model=dict)
 def list_sectors(
     db: Session = Depends(get_db),
     keyword: str | None = Query(None, description="Search by sector name"),

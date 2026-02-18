@@ -99,6 +99,7 @@ class TechnicianPackageOut(BaseModel):
     required_skills: List[SkillsOut]
     lowest_bid: Optional[float] = None
     lead_id: int
+    expected_end_date_or_deadline: datetime | None
       
     model_config = ConfigDict(
         from_attributes=True,
