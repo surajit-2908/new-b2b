@@ -116,6 +116,7 @@ class AdminPackageOut(BaseModel):
     required_skills: List[SkillsOut]
     lowest_bid: Optional[float] = None
     lead_id: int
+    technician: Optional[UserOut] = None
       
     model_config = ConfigDict(
         from_attributes=True,
