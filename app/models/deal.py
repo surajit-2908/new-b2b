@@ -43,7 +43,7 @@ class Deal(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
-    lead = relationship("Lead", back_populates="deals")
+    lead = relationship("Lead", back_populates="deal")
     work_packages = relationship("WorkPackage", back_populates="deal", cascade="all, delete-orphan")
     technical_context = relationship("TechnicalContext", back_populates="deal")
     communication = relationship("Communication", back_populates="deal")  
