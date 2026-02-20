@@ -239,6 +239,14 @@ def validate_triple_positive(lead: Lead, db: Session):
             status_code=400,
             detail="Subcontract, Technical Context, Communication, and Internal Note must be completed for this deal before marking as 'Fulfillment Stage'",
         )
+        
+    # Get max bidding_duration from all work packages
+    max_duration = db.query(func.max(WorkPackage.bidding_duration)).filter(
+        WorkPackage.deal_id == existing_deal.id
+    ).scalar()
+
+    # update deal table
+    existing_deal.max_duration = max_duration
 
     lead.follow_up_status = "Active"
     lead.triple_positive_timestamp = func.now()

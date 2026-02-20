@@ -47,6 +47,6 @@ class WorkPackage(Base):
     last_saved_at = Column(DateTime, server_default=func.now(), nullable=True)
 
     # Relationship
-    deal = relationship("Deal", back_populates="work_package", lazy="joined")
-    package_type = relationship("PackageType", back_populates="work_package", lazy="joined")
+    deal = relationship("Deal", back_populates="work_packages", lazy="joined")
+    package_type = relationship("PackageType", back_populates="work_packages", lazy="joined")
     # bidding_packages = relationship("BiddingPackage", back_populates="work_package", cascade="all, delete-orphan")

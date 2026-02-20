@@ -29,4 +29,4 @@ class Lead(Base):
             lazy="joined"        # ensures auto-join
         )
 
-    deal = relationship("Deal", back_populates="lead")
+    deal = relationship("Deal", back_populates="lead", uselist=False)

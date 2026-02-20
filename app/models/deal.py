@@ -30,6 +30,7 @@ class Deal(Base):
     deal_close_date = Column(DateTime, nullable=True)
     expected_start_date = Column(DateTime, nullable=True)
     expected_end_date_or_deadline = Column(DateTime, nullable=True)
+    max_duration = Column(Integer, nullable=False)
 
     client_approved_scope_summary = Column(Text, nullable=False)
     special_terms = Column(Text, nullable=True)
@@ -42,8 +43,8 @@ class Deal(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     # Relationship
-    lead = relationship("Lead", back_populates="deal")
-    work_package = relationship("WorkPackage", back_populates="deal")
+    lead = relationship("Lead", back_populates="deals")
+    work_packages = relationship("WorkPackage", back_populates="deal", cascade="all, delete-orphan")
     technical_context = relationship("TechnicalContext", back_populates="deal")
     communication = relationship("Communication", back_populates="deal")  
     internal_note = relationship("InternalNote", back_populates="deal")  
