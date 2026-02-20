@@ -13,4 +13,4 @@ class PackageType(Base):
     # Relationship
 
 
-    work_package = relationship("WorkPackage", back_populates="package_type", lazy="joined")
+    work_packages = relationship("WorkPackage", back_populates="package_type", lazy="joined")
