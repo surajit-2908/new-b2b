@@ -39,8 +39,15 @@ def auto_assign_lowest_bidder():
         for wp in work_packages:
             deal = wp.deal
             lead = deal.lead
-
+            
+            # skip if timestamp missing
+            if not lead or not lead.triple_positive_timestamp:
+                continue
             lead_ts = make_utc_aware(lead.triple_positive_timestamp)
+            
+            # skip if duration missing
+            if wp.bidding_duration_days is None:
+                continue
             bidding_end_time = lead_ts + timedelta(days=wp.bidding_duration_days)
 
             # Skip if bidding still active
