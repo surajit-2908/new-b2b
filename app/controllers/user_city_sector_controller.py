@@ -241,7 +241,7 @@ def validate_triple_positive(lead: Lead, db: Session):
         )
         
     # Get max bidding_duration from all work packages
-    max_duration = db.query(func.max(WorkPackage.bidding_duration)).filter(
+    max_duration = db.query(func.max(WorkPackage.bidding_duration_days)).filter(
         WorkPackage.deal_id == existing_deal.id
     ).scalar()
 
