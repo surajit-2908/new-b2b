@@ -25,3 +25,8 @@ class User(Base):
         self.password = pwd_context.hash(password)
 
     leads_assigned = relationship("Lead", back_populates="assigned_technician")
+    user_city_sectors = relationship(
+            "UserCitySector",
+            back_populates="user",
+            lazy="selectin"
+        )

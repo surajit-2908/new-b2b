@@ -12,7 +12,7 @@ class UserCitySector(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-    user = relationship("User")
+    user = relationship("User", back_populates="user_city_sectors")
 
     __table_args__ = (
         UniqueConstraint("sector", "city", name="unique_sector_city"),

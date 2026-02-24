@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import or_
 from app.database import get_db
 from app.models.user import User
 from app.auth import get_current_user
-from app.schemas.user import UserOut, UserCreate, UserUpdate, UserResponse
+from app.schemas.user import UserOut, UserCreate, UserUpdate, UserResponse, UserWithCitySectorOut
 from app.utils.email import send_user_email
 from passlib.context import CryptContext
 import os
@@ -34,7 +34,7 @@ def get_all_users(
         regex="^(Admin|Sales|Technician)$"
     )
 ):
-    query = db.query(User)
+    query = db.query(User).options(selectinload(User.user_city_sectors))
     if keyword:
         query = query.filter(or_(
             User.name.ilike(f"%{keyword}%"),
@@ -48,7 +48,7 @@ def get_all_users(
     
     users, meta = paginate(query.order_by(User.created_at.desc()), page, limit)
 
-    users_out: List[UserOut] = [UserOut.from_orm(u) for u in users]
+    users_out: List[UserWithCitySectorOut] = [UserWithCitySectorOut.from_orm(u) for u in users]
 
     return {
         "data": {

@@ -16,3 +16,11 @@ class UserCitySectorOut(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+class BasicUserCitySectorOut(BaseModel):
+    sector: str
+    city: str
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

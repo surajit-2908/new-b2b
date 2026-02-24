@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Optional
-
+from typing import List
+from app.schemas.user_city_sector_schema import BasicUserCitySectorOut
 class UserBase(BaseModel):
     email: EmailStr
     name: Optional[str] = None
@@ -23,6 +24,16 @@ class UserOut(BaseModel):
         from_attributes=True,
         validate_by_name=True
     )
+    
+class UserWithCitySectorOut(BaseModel):
+    id: int
+    email: EmailStr
+    name: Optional[str] = None
+    role: Optional[str] = None
+
+    user_city_sectors: List[BasicUserCitySectorOut] = []
+
+    model_config = ConfigDict(from_attributes=True)
         
 class UserResponse(BaseModel):
     message: str
