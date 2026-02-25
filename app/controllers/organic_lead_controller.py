@@ -128,6 +128,8 @@ async def add_organic_lead(
         existing_lead.email = data.email
         existing_lead.address = data.address
         existing_lead.summary = data.summary
+        existing_lead.business_name = data.business_name
+        existing_lead.contact_person_name = data.contact_person_name
 
         db.commit()
         db.refresh(existing_lead)
@@ -144,6 +146,8 @@ async def add_organic_lead(
         lead_status="Qualified Lead", # Default status for new leads
         lead_type="Organic Lead",
         user_id=current_user.id,
+        business_name=data.business_name,
+        contact_person_name=data.contact_person_name
     )
     db.add(new_lead)
     db.commit()
