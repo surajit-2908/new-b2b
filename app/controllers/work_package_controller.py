@@ -519,7 +519,7 @@ def get_packages_for_admin(
                     Skill.id.in_(pkg.required_skills_ids)
                 ).all() if pkg.required_skills_ids else [],
                 lowest_bid=lowest_bid.bidding_amount if lowest_bid else None,
-                technician = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
+                assigned_technician = db.query(User).filter(User.id == pkg.assigned_technician_id).first()
             )
         )
 
