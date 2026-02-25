@@ -7,6 +7,8 @@ class OrganicLeadCreate(BaseModel):
     id: Optional[int] = None
     sector: str
     city: str
+    business_name: str
+    contact_person_name: str
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
     address: Optional[str] = None
@@ -18,6 +20,8 @@ class OrganicLeadResponse(BaseModel):
     id: int
     sector: str
     city: str
+    business_name: Optional[str] = None
+    contact_person_name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
     address: Optional[str] = None
