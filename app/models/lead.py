@@ -22,6 +22,9 @@ class Lead(Base):
     lead_type = Column(String(50), nullable=False, default="Scrapping Lead")
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    business_name = Column(String(255), nullable=True)
+    contact_person_name = Column(String(255), nullable=True) 
+    review = Column(String(1024), nullable=True) 
 
     assigned_technician = relationship(
             "User",
