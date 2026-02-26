@@ -144,7 +144,9 @@ async def fetch_grid_data(client, db, lat, lng, sector, city):
                 "phone": details.get("formatted_phone_number"),
                 "email": None,
                 "address": address,
-                "summary": f"{name} | Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
+                # "summary": f"{name} | Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
+                "business_name": f"{name})",
+                "review": f"Rating: {rating or 'N/A'} ({user_ratings or 0} reviews)"
             }
 
             create_lead(db, lead_data)
