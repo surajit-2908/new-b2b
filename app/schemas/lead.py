@@ -21,6 +21,7 @@ class LeadOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     deal_close_date: Optional[str] = ""
+    assigned_user: Optional[UserOut] = None
 
     model_config = ConfigDict(
         from_attributes=True,
