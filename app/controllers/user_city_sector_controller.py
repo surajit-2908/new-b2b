@@ -130,15 +130,15 @@ def get_user_assigned_leads(
     serialized_leads = []
 
     for lead, deal_close_date, user in leads:
-      lead_obj = LeadOut.model_validate(lead)
-      lead_data = lead_obj.model_dump()
+        lead_obj = LeadOut.model_validate(lead)
+        lead_data = lead_obj.model_dump()
 
-    lead_data["deal_close_date"] = deal_close_date or ""
-    lead_data["assigned_user"] = (
-        UserOut.model_validate(user).model_dump() if user else None
-    )
+        lead_data["deal_close_date"] = deal_close_date or ""
+        lead_data["assigned_user"] = (
+            UserOut.model_validate(user).model_dump() if user else None
+        )
 
-    serialized_leads.append(lead_data)
+        serialized_leads.append(lead_data)
     return {
         "data": serialized_leads,
         "meta": {
