@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from app.database import get_db
+from datetime import datetime, timezone
 from app.models.communication import Communication
 from app.models.deal import Deal
 from app.models.internal_note import InternalNote
@@ -10,9 +11,9 @@ from app.models.technical_context import TechnicalContext
 from app.models.user_city_sector import UserCitySector
 from app.models.lead import Lead
 from app.models.work_package import WorkPackage
-from app.schemas.lead import LeadOut
+from app.schemas.lead import LeadOut, AssignLeadRequest
 from app.models.user import User
-from app.schemas.user_city_sector_schema import UserCitySectorCreate, UserCitySectorOut
+from app.schemas.user_city_sector_schema import UserCitySectorCreate
 from app.auth import role_required
 from app.utils.pagination import paginate
 from app.constants.lead_status import ALLOWED_STATUSES
@@ -20,7 +21,7 @@ from app.schemas.user import UserOut
 
 router = APIRouter(prefix="/sales", tags=["User Sector Assignment"])
 
-@router.post("/assign-user", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
+@router.post("/city-sector/assign-user", response_model=dict, dependencies=[Depends(role_required(["Admin"]))])
 def assign_sector_city(data: UserCitySectorCreate, db: Session = Depends(get_db)):
     """
     Assign a sector and city to a user.
@@ -288,3 +289,30 @@ def get_user_by_lead(lead_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user  
+
+@router.put("/assign-user")
+def assign_user_to_leads(
+    payload: AssignLeadRequest,
+    db: Session = Depends(get_db)
+):
+    # fetch leads
+    leads = db.query(Lead).filter(Lead.id.in_(payload.lead_ids)).all()
+
+    if not leads:
+        raise HTTPException(status_code=404, detail="No leads found")
+
+    current_time = datetime.now(timezone.utc)
+
+    # update leads
+    for lead in leads:
+        lead.user_id = payload.user_id
+        lead.assigned_datetime = current_time
+
+    db.commit()
+
+    return {
+        "message": f"{len(leads)} lead(s) assigned successfully",
+        "lead_ids": [lead.id for lead in leads],
+        "assigned_user": payload.user_id,
+        "assigned_datetime": current_time
+    }

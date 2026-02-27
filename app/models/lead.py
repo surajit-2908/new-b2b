@@ -25,7 +25,8 @@ class Lead(Base):
     business_name = Column(String(255), nullable=True)
     contact_person_name = Column(String(255), nullable=True) 
     review = Column(String(1024), nullable=True) 
-
+    assigned_datetime = Column(DateTime(timezone=True), nullable=True)
+    
     assigned_technician = relationship(
             "User",
             back_populates="leads_assigned",
