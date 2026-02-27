@@ -72,14 +72,16 @@ def get_user_assigned_leads(
     page: int = Query(1, ge=1, description="Page number for pagination"),
     limit: int = Query(10, ge=1, le=100, description="Number of leads per page"),
     lead_type: Optional[str] = Query(None, description="Filter by lead type (Traffic Lead/Scrapping Lead)"),
+    assigned: Optional[bool] = Query(None, description="If true, return only leads that are assigned to a user")
 ):        
     """
     Get leads assigned to a user based on their sector and city assignments, with optional filters for follow-up status, sector, city, lead status, and lead type. Supports pagination.
     """
     query = (
-        db.query(Lead, Deal.deal_close_date)
-        .outerjoin(Deal, Deal.lead_id == Lead.id)
-    )
+    db.query(Lead, Deal.deal_close_date, User)
+    .outerjoin(Deal, Deal.lead_id == Lead.id)
+    .outerjoin(User, User.id == Lead.user_id)
+)
 
     # ✅ Filter by user assignments if user_id provided
     if user_id:
@@ -118,13 +120,26 @@ def get_user_assigned_leads(
     if lead_type:
         query = query.filter(Lead.lead_type.ilike(f"%{lead_type}%"))
         
+    if assigned is not None:
+        if assigned:
+            query = query.filter(Lead.user_id.isnot(None))
+        else:
+            query = query.filter(Lead.user_id.is_(None))
+        
     # ✅ Pagination logic
     leads, meta = paginate(query.order_by(Lead.created_at.desc()), page, limit)
-    serialized_leads = [
-        {**LeadOut.from_orm(lead).dict(), "deal_close_date": deal_close_date or ""}
-        for lead, deal_close_date in leads
-    ]
+    serialized_leads = []
 
+    for lead, deal_close_date, user in leads:
+        lead_obj = LeadOut.model_validate(lead)
+        lead_data = lead_obj.model_dump()
+
+        lead_data["deal_close_date"] = deal_close_date or ""
+        lead_data["assigned_user"] = (
+            UserOut.model_validate(user).model_dump() if user else None
+        )
+
+        serialized_leads.append(lead_data)
     return {
         "data": serialized_leads,
         "meta": {
